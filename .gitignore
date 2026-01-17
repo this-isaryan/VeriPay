@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# macOS
+.DS_Store
+
+# Models & data
+saved_models/
+temp_images/
+sample_invoices/
+
+# Logs
+*.log
+
