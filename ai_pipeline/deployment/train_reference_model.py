@@ -4,8 +4,8 @@ import pickle
 import json
 import numpy as np
 
-from advanced.pipeline_layoutlm import process_invoice_layoutlm
-from advanced.anomaly import AnomalyDetector
+from ai_pipeline.advanced.pipeline_layoutlm import process_invoice_layoutlm
+from ai_pipeline.advanced.anomaly import AnomalyDetector
 
 MODEL_DIR = "saved_models"
 MODEL_PATH = f"{MODEL_DIR}/anomaly_model.pkl"
