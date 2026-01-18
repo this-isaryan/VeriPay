@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String
-from conn_db import Base
+from backend.conn_db import Base
 
 class Vendor(Base):
     __tablename__ = "vendors"

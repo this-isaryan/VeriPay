@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from datetime import datetime
-from conn_db import Base
+from backend.conn_db import Base
 
 class Invoice(Base):
     __tablename__ = "invoices"

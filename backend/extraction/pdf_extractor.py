@@ -1,5 +1,5 @@
 from PyPDF2 import PdfReader
-from integrity.signature_detection import detect_signature
+from backend.integrity.signature_detection import detect_signature
 
 def extract_pdf_content(file_path: str) -> dict:
     reader = PdfReader(file_path)
