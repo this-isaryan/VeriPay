@@ -5,14 +5,14 @@ import uuid
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-from extraction.pdf_extractor import extract_pdf_content
-from extraction.image_extractor import extract_image_content
-from integrity.integrity_service import evaluate_integrity
-from integrity.vendor_identity_service import verify_vendor_identity
-from utils.hashing import compute_sha256
-from models.invoice import Invoice
-from models.vendor import Vendor
-from dependencies import get_db
+from backend.extraction.pdf_extractor import extract_pdf_content
+from backend.extraction.image_extractor import extract_image_content
+from backend.integrity.integrity_service import evaluate_integrity
+from backend.integrity.vendor_identity_service import verify_vendor_identity
+from backend.utils.hashing import compute_sha256
+from backend.models.invoice import Invoice
+from backend.models.vendor import Vendor
+from backend.dependencies import get_db
 
 
 router = APIRouter(

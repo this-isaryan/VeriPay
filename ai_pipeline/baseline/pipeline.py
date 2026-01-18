@@ -1,5 +1,5 @@
-from utils.pdf_to_image import pdf_to_images
-from utils.ocr import extract_text_from_image
+from backend.utils.pdf_to_image import pdf_to_images
+from backend.utils.ocr import extract_text_from_image
 from baseline.features import extract_features
 
 
