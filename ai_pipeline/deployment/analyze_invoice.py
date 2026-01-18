@@ -4,9 +4,9 @@ import json
 import numpy as np
 from typing import Dict, Any
 
-from advanced.pipeline_layoutlm import process_invoice_layoutlm
-from interpretation.explanation import compute_z_score, generate_explanations
-from interpretation.risk_policy import interpret_risk
+from ai_pipeline.advanced.pipeline_layoutlm import process_invoice_layoutlm
+from ai_pipeline.interpretation.explanation import compute_z_score, generate_explanations
+from ai_pipeline.interpretation.risk_policy import interpret_risk
 
 MODEL_PATH = "saved_models/anomaly_model.pkl"
 STATS_PATH = "saved_models/embedding_stats.json"
