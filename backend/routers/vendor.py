@@ -5,8 +5,8 @@ from cryptography.hazmat.backends import default_backend
 import hashlib
 from cryptography.hazmat.primitives import serialization
 
-from models.vendor import Vendor
-from dependencies import get_db
+from backend.models.vendor import Vendor
+from backend.dependencies import get_db
 
 router = APIRouter(
     prefix="/vendors",
