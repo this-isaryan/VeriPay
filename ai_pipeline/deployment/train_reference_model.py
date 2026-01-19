@@ -7,7 +7,13 @@ import numpy as np
 from ai_pipeline.advanced.pipeline_layoutlm import process_invoice_layoutlm
 from ai_pipeline.advanced.anomaly import AnomalyDetector
 
-MODEL_DIR = "saved_models"
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+MODEL_DIR = BASE_DIR / "saved_models"
+MODEL_PATH = MODEL_DIR / "anomaly_model.pkl"
+STATS_PATH = MODEL_DIR / "embedding_stats.json"
+
 MODEL_PATH = f"{MODEL_DIR}/anomaly_model.pkl"
 STATS_PATH = f"{MODEL_DIR}/embedding_stats.json"
 
