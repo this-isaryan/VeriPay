@@ -1,4 +1,4 @@
-from advanced.layoutlm_features import extract_layoutlm_embedding
+from ai_pipeline.advanced.layoutlm_features import extract_layoutlm_embedding
 
 
 vec = extract_layoutlm_embedding("sample_invoices/a99.pdf")
