@@ -3,17 +3,20 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 MODEL_NAME = "bert-base-uncased"
 
-tokenizer = None
-model = None
+_tokenizer = None
+_model = None
 
 def load_model():
-    global tokenizer, model
+    global _tokenizer, _model
 
-    if model is None or tokenizer is None:
+    if _tokenizer is None or _model is None:
         print("Loading AI model...")
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-        model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
-        model.eval()
+        _tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+        _model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
+        _model.eval()
         print("Model loaded successfully")
 
-    return tokenizer, model
+def get_model():
+    if _tokenizer is None or _model is None:
+        raise RuntimeError("Model not loaded. Startup event failed.")
+    return _tokenizer, _model
