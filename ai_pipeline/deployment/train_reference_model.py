@@ -4,18 +4,21 @@ import pickle
 import json
 import numpy as np
 
-from advanced.pipeline_layoutlm import process_invoice_layoutlm
-from advanced.anomaly import AnomalyDetector
+from ai_pipeline.advanced.pipeline_layoutlm import process_invoice_layoutlm
+from ai_pipeline.advanced.anomaly import AnomalyDetector
 
-MODEL_DIR = "saved_models"
-MODEL_PATH = f"{MODEL_DIR}/anomaly_model.pkl"
-STATS_PATH = f"{MODEL_DIR}/embedding_stats.json"
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+MODEL_DIR = BASE_DIR / "saved_models"
+MODEL_PATH = MODEL_DIR / "anomaly_model.pkl"
+STATS_PATH = MODEL_DIR / "embedding_stats.json"
 
 
 def main():
     os.makedirs(MODEL_DIR, exist_ok=True)
 
-    invoice_paths = glob.glob("sample_invoices/*.pdf")
+    invoice_paths = glob.glob(str(BASE_DIR / "sample_invoices" / "*.pdf"))
 
     if len(invoice_paths) < 5:
         raise ValueError("Need at least 5 reference invoices")

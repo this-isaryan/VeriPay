@@ -1,10 +1,10 @@
 import glob
 import os
 from baseline.pipeline import process_invoice
-from advanced.anomaly import AnomalyDetector
+from ai_pipeline.advanced.anomaly import AnomalyDetector
 from baseline.explain import compute_feature_stats, explain_anomaly
-from utils.normalize import normalize_scores
-from utils.visualize import visualize_results
+from backend.utils.normalize import normalize_scores
+from backend.utils.visualize import visualize_results
 
 
 def main():

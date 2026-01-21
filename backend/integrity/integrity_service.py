@@ -1,5 +1,5 @@
-from integrity.signature_detection import detect_signature
-from integrity.signature_verifier import verify_signature
+from backend.integrity.signature_detection import detect_signature
+from backend.integrity.signature_verifier import verify_signature
 
 
 def derive_signature_status(result: dict) -> str:

@@ -1,4 +1,4 @@
-from advanced.layoutlm_features import extract_layoutlm_embedding
+from ai_pipeline.advanced.layoutlm_features import extract_layoutlm_embedding
 
 
 def process_invoice_layoutlm(pdf_path):
