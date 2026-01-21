@@ -4,6 +4,7 @@ from ai_pipeline.model_loader import load_model
 from backend.conn_db import engine, Base
 from backend.routers import vendor as vendor_router
 from backend.routers import invoice as invoice_router
+from backend.routers.invoice_analysis import router as invoice_analysis_router
 
 app = FastAPI(title="VeriPay API")
 
@@ -28,6 +29,7 @@ Base.metadata.create_all(bind=engine)
 # Routers (NO extra prefix here)
 app.include_router(vendor_router.router)
 app.include_router(invoice_router.router)
+app.include_router(invoice_analysis_router)
 
 @app.get("/")
 def root():

@@ -1,36 +1,43 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from fastapi.responses import JSONResponse
-import tempfile
-import os
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from backend.dependencies import get_db
+from backend.models.invoice import Invoice
+from backend.models.analysis_result import AnalysisResult
+from ai_pipeline.inference import run_inference
 
-from ai_pipeline.deployment.analyze_invoice import analyze_invoice_file
+router = APIRouter(
+    prefix="/invoices",
+    tags=["Invoice Analysis"]
+)
 
-router = APIRouter(prefix="/invoices", tags=["Invoices"])
+@router.post("/{invoice_id}/analyze")
+def analyze_invoice(
+    invoice_id: int,
+    db: Session = Depends(get_db)
+):
+    invoice = db.query(Invoice).filter(
+        Invoice.invoice_id == invoice_id
+    ).first()
 
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
 
-@router.post("/analyze")
-async def analyze_invoice(file: UploadFile = File(...)):
-    # --- Validate file ---
-    if not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF invoices are supported")
+    prediction, confidence = run_inference(invoice.file_path)
 
-    # --- Save to temp file ---
-    try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-            contents = await file.read()
-            tmp.write(contents)
-            temp_path = tmp.name
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to save uploaded file")
+    result = AnalysisResult(
+        invoice_id=invoice.invoice_id,
+        prediction=prediction,
+        confidence=confidence,
+        model_version="bert-v1"
+    )
 
-    # --- Run AI analysis ---
-    try:
-        result = analyze_invoice_file(temp_path)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"AI analysis failed: {str(e)}")
-    finally:
-        # Clean up temp file
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
+    invoice.status = "analyzed"
 
-    return JSONResponse(content=result)
+    db.add(result)
+    db.commit()
+
+    return {
+        "invoice_id": invoice.invoice_id,
+        "prediction": prediction,
+        "confidence": confidence
+    }

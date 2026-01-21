@@ -64,12 +64,18 @@ async def upload_invoice(
     file_hash = compute_sha256(contents)
 
     # 🔐 STEP 1 — Reject duplicates
+    # 🔐 STEP 1 — Handle duplicates gracefully
     existing = db.query(Invoice).filter(Invoice.file_hash == file_hash).first()
     if existing:
-        raise HTTPException(
-            status_code=409,
-            detail="Duplicate invoice detected (same file already uploaded)"
-        )
+        return {
+            "status": "already_uploaded",
+            "invoice_id": existing.invoice_id,
+            "file_hash": existing.file_hash,
+            "file_type": "pdf" if content_type == "application/pdf" else "image",
+            "integrity": {
+                "note": "Invoice already exists, skipping re-upload"
+            }
+        }
 
     # 5️⃣ Store file
     safe_filename = f"{uuid.uuid4()}{extension}"
