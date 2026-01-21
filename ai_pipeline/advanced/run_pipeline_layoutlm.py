@@ -1,9 +1,9 @@
 import glob
 import os
-from advanced.pipeline_layoutlm import process_invoice_layoutlm
-from advanced.anomaly import AnomalyDetector
-from utils.normalize import normalize_scores
-from utils.visualize import visualize_results
+from ai_pipeline.advanced.pipeline_layoutlm import process_invoice_layoutlm
+from ai_pipeline.advanced.anomaly import AnomalyDetector
+from backend.utils.normalize import normalize_scores
+from backend.utils.visualize import visualize_results
 
 
 def main():
