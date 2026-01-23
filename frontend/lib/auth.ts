@@ -1,20 +1,21 @@
 export type Role = "submitter" | "reviewer";
 
-export function getAuth() {
-  if (typeof window === "undefined") return null;
-  const raw = localStorage.getItem("auth");
-  return raw ? JSON.parse(raw) : null;
-}
-
 export function login(role: Role) {
-  localStorage.setItem(
-    "auth",
-    JSON.stringify({ role, loggedIn: true })
-  );
+  document.cookie = `auth=${JSON.stringify({
+    role,
+    loggedIn: true,
+  })}; path=/`;
 }
 
 export function logout() {
-  localStorage.removeItem("auth");
+  document.cookie = "auth=; Max-Age=0; path=/";
+}
+
+export function getAuthFromCookie() {
+  if (typeof document === "undefined") return null;
+
+  const match = document.cookie.match(/auth=([^;]+)/);
+  return match ? JSON.parse(decodeURIComponent(match[1])) : null;
 }
 
 /* This will later be replaced with JWT cookies. For now, it lets us build everything. */
