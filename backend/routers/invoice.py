@@ -168,3 +168,23 @@ def list_invoices(db: Session = Depends(get_db)):
         }
         for inv in invoices
     ]
+
+@router.get("/{invoice_id}")
+def get_invoice(invoice_id: int, db: Session = Depends(get_db)):
+    invoice = db.query(Invoice).filter(
+        Invoice.invoice_id == invoice_id
+    ).first()
+
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+
+    return {
+        "invoice_id": invoice.invoice_id,
+        "status": invoice.status,
+        "file_path": invoice.file_path,
+        "file_hash": invoice.file_hash,
+        "is_signed": invoice.is_signed,
+        "crypto_valid": invoice.crypto_valid,
+        "signer_fingerprint": invoice.signer_fingerprint,
+        "created_at": invoice.created_at,
+    }
