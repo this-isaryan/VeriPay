@@ -153,3 +153,18 @@ async def upload_invoice(
         "file_type": file_category,
         "integrity": integrity
     }
+
+@router.get("")
+def list_invoices(db: Session = Depends(get_db)):
+    invoices = db.query(Invoice).order_by(Invoice.created_at.desc()).all()
+
+    return [
+        {
+            "invoice_id": inv.invoice_id,
+            "status": inv.status,
+            "file_hash": inv.file_hash,
+            "created_at": inv.created_at,
+            "flags": [],  # placeholder (anomaly, duplicate, etc.)
+        }
+        for inv in invoices
+    ]
