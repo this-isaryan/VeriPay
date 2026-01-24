@@ -153,3 +153,38 @@ async def upload_invoice(
         "file_type": file_category,
         "integrity": integrity
     }
+
+@router.get("")
+def list_invoices(db: Session = Depends(get_db)):
+    invoices = db.query(Invoice).order_by(Invoice.created_at.desc()).all()
+
+    return [
+        {
+            "invoice_id": inv.invoice_id,
+            "status": inv.status,
+            "file_hash": inv.file_hash,
+            "created_at": inv.created_at,
+            "flags": [],  # placeholder (anomaly, duplicate, etc.)
+        }
+        for inv in invoices
+    ]
+
+@router.get("/{invoice_id}")
+def get_invoice(invoice_id: int, db: Session = Depends(get_db)):
+    invoice = db.query(Invoice).filter(
+        Invoice.invoice_id == invoice_id
+    ).first()
+
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+
+    return {
+        "invoice_id": invoice.invoice_id,
+        "status": invoice.status,
+        "file_path": invoice.file_path,
+        "file_hash": invoice.file_hash,
+        "is_signed": invoice.is_signed,
+        "crypto_valid": invoice.crypto_valid,
+        "signer_fingerprint": invoice.signer_fingerprint,
+        "created_at": invoice.created_at,
+    }
