@@ -1,6 +1,9 @@
 # VeriPay - macOS Run Guide
 
 ## Backend (FastAPI)
+Go to Backend > .env
+Update DB_USER= with your machine username
+
 ```bash
 cd /Users/meetsolanki/Void/study_material/c4990/veripay/backend
 python3 -m venv ../venv

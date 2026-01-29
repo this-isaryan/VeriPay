@@ -1,6 +1,9 @@
 # VeriPay - Windows Run Guide
 
 ## Backend (FastAPI)
+Go to Backend > .env
+Update DB_USER= with your machine username
+
 ```powershell
 cd C:\Users\meetsolanki\Void\study_material\c4990\veripay\backend
 py -m venv ..\venv
