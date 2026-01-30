@@ -4,6 +4,8 @@ from pdf2image import convert_from_path
 from PIL import Image
 import numpy as np
 import warnings
+POPPLER_PATH = r"C:\poppler\poppler-25.12.0\Library\bin"
+
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 
