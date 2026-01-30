@@ -16,7 +16,7 @@ Thumbs.db
 *.log
 
 #db
-.env
+**/.env
 
 #  my local files
 todo.txt
