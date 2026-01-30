@@ -4,7 +4,8 @@ from pdf2image import convert_from_path
 from PIL import Image
 import numpy as np
 import warnings
-POPPLER_PATH = r"C:\poppler\poppler-25.12.0\Library\bin"
+
+from utils.poppler import ensure_poppler_available
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -21,14 +22,22 @@ model = LayoutLMv3Model.from_pretrained(
 model.eval()  # inference mode
 
 
-def extract_layoutlm_embedding(pdf_path):
+def extract_layoutlm_embedding(pdf_path: str) -> np.ndarray:
     """
     Returns a single document-level embedding vector
     using LayoutLMv3.
     """
 
+    # Ensure Poppler is available on this system
+    ensure_poppler_available()
+
     # Convert first page of PDF to image
-    images = convert_from_path(pdf_path, first_page=1, last_page=1)
+    images = convert_from_path(
+        pdf_path,
+        first_page=1,
+        last_page=1
+    )
+
     image = images[0].convert("RGB")
 
     # Prepare inputs

@@ -3,23 +3,9 @@ import pickle
 from pathlib import Path
 import sys
 import shutil
-import os
-import platform
 import numpy as np
 
-
-def ensure_poppler_available():
-    system = platform.system().lower()
-
-    if system == "windows":
-        poppler_path = Path(r"C:\poppler\poppler-25.12.0\Library\bin")
-        if not poppler_path.exists():
-            raise RuntimeError("Poppler not found on Windows.")
-        os.environ["PATH"] += f";{poppler_path}"
-    else:
-        from shutil import which
-        if which("pdftoppm") is None:
-            raise RuntimeError("Poppler not found.")
+from utils.poppler import ensure_poppler_available
 
 
 AI_PIPELINE_DIR = Path(__file__).resolve().parents[2] / "ai_pipeline"
@@ -33,15 +19,24 @@ if str(AI_PIPELINE_DIR) not in sys.path:
 def run_ai_analysis(invoice_path: str) -> dict:
     tesseract_path = shutil.which("tesseract")
     if not tesseract_path:
-        return {"status": "error", "message": "Tesseract not installed"}
+        return {
+            "status": "error",
+            "message": "Tesseract OCR is not installed"
+        }
 
     try:
         ensure_poppler_available()
     except RuntimeError as exc:
-        return {"status": "error", "message": str(exc)}
+        return {
+            "status": "error",
+            "message": str(exc)
+        }
 
     if not MODEL_PATH.exists() or not STATS_PATH.exists():
-        return {"status": "error", "message": "Model files missing"}
+        return {
+            "status": "error",
+            "message": "AI model files are missing"
+        }
 
     import pytesseract
     from advanced.pipeline_layoutlm import process_invoice_layoutlm
@@ -56,7 +51,13 @@ def run_ai_analysis(invoice_path: str) -> dict:
     with open(STATS_PATH, "r") as f:
         stats = json.load(f)
 
-    embedding = process_invoice_layoutlm(invoice_path)
+    try:
+        embedding = process_invoice_layoutlm(invoice_path)
+    except Exception as exc:
+        return {
+            "status": "error",
+            "message": f"AI analysis failed: {exc}"
+        }
 
     raw_score = detector.score(dict(enumerate(embedding)))
     normalized_score = 1 / (1 + np.exp(-raw_score))

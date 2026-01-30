@@ -1,6 +1,6 @@
 from PyPDF2 import PdfReader
 from integrity.signature_detection import detect_signature
-POPPLER_PATH = r"C:\poppler\poppler-25.12.0\Library\bin"
+
 
 def extract_pdf_content(file_path: str) -> dict:
     reader = PdfReader(file_path)
