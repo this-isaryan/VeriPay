@@ -15,8 +15,9 @@ Thumbs.db
 # Logs
 *.log
 
-#db
-**/.env
+# Environment variables
+.env
+backend/.env
 
 #  my local files
 todo.txt
