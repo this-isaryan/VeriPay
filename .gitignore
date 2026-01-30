@@ -4,3 +4,4 @@ __pycache__/
 *.dylib
 node_modules/
 .next/
+todo.txt
