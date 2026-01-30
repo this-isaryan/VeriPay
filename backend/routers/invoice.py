@@ -86,10 +86,27 @@ async def upload_invoice(
     ).first()
 
     if existing:
-        raise HTTPException(
-            status_code=409,
-            detail="Duplicate invoice detected"
+        previous_analysis = (
+            db.query(AnalysisResult)
+            .filter(AnalysisResult.invoice_id == existing.invoice_id)
+            .order_by(AnalysisResult.created_at.desc())
+            .first()
         )
+
+        return {
+            "status": "duplicate",
+            "message": "Invoice already analyzed",
+            "invoice_id": existing.invoice_id,
+            "file_hash": existing.file_hash,
+            "has_analysis": previous_analysis is not None,
+            "previous_result": {
+                "crypto": previous_analysis.crypto_json if previous_analysis else None,
+                "ai": previous_analysis.ai_json if previous_analysis else None,
+                "rules": previous_analysis.rules_json if previous_analysis else None,
+                "prediction": previous_analysis.prediction if previous_analysis else None,
+                "confidence": previous_analysis.confidence if previous_analysis else None,
+            } if previous_analysis else None
+        }
 
     # 5️⃣ Persist file
     safe_filename = f"{uuid.uuid4()}{extension}"

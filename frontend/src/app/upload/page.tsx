@@ -10,8 +10,13 @@ const API_BASE =
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState("");
-  const [result, setResult] = useState<Record<string, unknown> | null>(null);
+  const [result, setResult] = useState<Record<string, any> | null>(null);
   const [autoAnalyze, setAutoAnalyze] = useState(true);
+
+  // 🔽 NEW STATE FOR DUPLICATES
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [duplicateData, setDuplicateData] = useState<any>(null);
+
   const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -29,6 +34,7 @@ export default function UploadPage() {
 
     try {
       setStatus("Uploading invoice...");
+
       const response = await fetch(`${API_BASE}/invoices/upload`, {
         method: "POST",
         body: formData,
@@ -43,11 +49,20 @@ export default function UploadPage() {
 
       setResult(data);
       setStatus("Upload complete.");
-      if (autoAnalyze) {
+
+      // 🔴 DUPLICATE HANDLING
+      if (data.status === "duplicate") {
+        setDuplicateData(data);
+        setShowDuplicateModal(true);
+        return;
+      }
+
+      // 🟢 NORMAL FLOW
+      if (data.status === "stored" && autoAnalyze) {
         const invoiceId = String(data.invoice_id);
         router.push(`/analysis?invoiceId=${invoiceId}&run=1`);
       }
-    } catch (_error) {
+    } catch {
       setStatus("Unable to reach the API.");
     }
   };
@@ -78,6 +93,7 @@ export default function UploadPage() {
               required
             />
           </div>
+
           <div className="actions">
             <button className="button" type="submit">
               Upload invoice
@@ -86,6 +102,7 @@ export default function UploadPage() {
               Allowed: PDF, PNG, JPG • Max size per browser limits
             </span>
           </div>
+
           <label className="toggle">
             <input
               type="checkbox"
@@ -94,6 +111,7 @@ export default function UploadPage() {
             />
             <span>Analyze immediately after upload</span>
           </label>
+
           {status ? <p className="status">{status}</p> : null}
         </form>
       </section>
@@ -110,15 +128,19 @@ export default function UploadPage() {
               <p className="metric-label">Invoice ID</p>
               <p className="metric-value">{String(result.invoice_id)}</p>
             </div>
-            <div>
-              <p className="metric-label">File type</p>
-              <p className="metric-value">{String(result.file_type)}</p>
-            </div>
+            {result.file_type && (
+              <div>
+                <p className="metric-label">File type</p>
+                <p className="metric-value">{String(result.file_type)}</p>
+              </div>
+            )}
           </div>
+
           <div className="upload-meta">
             <p className="metric-label">File hash</p>
             <p className="mono">{String(result.file_hash)}</p>
           </div>
+
           <div className="dashboard-actions">
             <Link
               className="button"
@@ -131,6 +153,66 @@ export default function UploadPage() {
             </Link>
           </div>
         </section>
+      ) : null}
+
+      {/* DUPLICATE MODAL */}
+      {showDuplicateModal && duplicateData ? (
+        <div className="modal-backdrop">
+          <div className="modal">
+            <h2>Invoice already analyzed</h2>
+            <p>
+              This invoice was previously checked. What would you like to do?
+            </p>
+
+            <div className="modal-actions">
+              <button
+                className="button"
+                onClick={() => {
+                  router.push(
+                    `/analysis?invoiceId=${duplicateData.invoice_id}`
+                  );
+                }}
+              >
+                View previous result
+              </button>
+
+              <button
+                className="button outline"
+                onClick={async () => {
+                  if (!file) return;
+
+                  setShowDuplicateModal(false);
+                  setStatus("Rechecking invoice...");
+
+                  const formData = new FormData();
+                  formData.append("file", file);
+
+                  const response = await fetch(
+                    `${API_BASE}/invoices/upload?force_recheck=true`,
+                    {
+                      method: "POST",
+                      body: formData,
+                    }
+                  );
+
+                  const data = await response.json();
+                  router.push(
+                    `/analysis?invoiceId=${data.invoice_id}&run=1`
+                  );
+                }}
+              >
+                Recheck invoice
+              </button>
+
+              <button
+                className="button ghost"
+                onClick={() => setShowDuplicateModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       ) : null}
 
       <p className="hint">
