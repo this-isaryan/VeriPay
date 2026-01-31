@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("");
   const router = useRouter();
+  const { refresh } = useAuth();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -31,6 +33,7 @@ export default function LoginPage() {
 
       const data = await response.json();
       setStatus(data.message ?? "Login successful.");
+      await refresh();
       router.push("/dashboard");
     } catch (_error) {
       setStatus("Unable to reach the API.");
