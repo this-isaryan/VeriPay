@@ -71,6 +71,21 @@ export default function AnalysisPage() {
 
   const canAnalyze = useMemo(() => selectedId.trim().length > 0, [selectedId]);
 
+  const aiStatusLabel = () => {
+    if (!result) return null;
+
+    if (result.ai.status === "ok") {
+      return <span className="pill success">AI analysis complete</span>;
+    }
+
+    if (result.ai.status === "skipped") {
+      return <span className="pill warning">AI not applicable</span>;
+    }
+
+    return <span className="pill danger">AI analysis failed</span>;
+  };
+
+
   useEffect(() => {
     const loadInvoices = async () => {
       try {
@@ -218,9 +233,13 @@ export default function AnalysisPage() {
           </article>
 
           <article className="card">
-            <h3>AI anomaly analysis</h3>
+            <h3>
+              AI anomaly analysis{" "}
+              {aiStatusLabel()}
+            </h3>
             {result.ai.status !== "ok" ? (
-              <p className="status">{result.ai.message ?? "AI analysis unavailable."}</p>
+              <p className="status">{result.ai.message ?? "AI analysis did not return a usable result."}</p>
+
             ) : (
               <div className="analysis-list">
                 <div>
