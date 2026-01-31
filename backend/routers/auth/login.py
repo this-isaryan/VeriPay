@@ -3,8 +3,11 @@ from sqlalchemy.orm import Session
 from schemas.auth import LoginRequest
 from services.auth import authenticate_user
 from conn_db import get_db
+from dependencies import get_current_user
+from models.user import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
 
 @router.post("/login")
 def login(
@@ -25,4 +28,18 @@ def login(
             "id": user.id,
             "email": user.email
         }
+    }
+
+
+@router.post("/logout")
+def logout(request: Request):
+    request.session.clear()
+    return {"message": "Logged out successfully"}
+
+
+@router.get("/me")
+def me(user: User = Depends(get_current_user)):
+    return {
+        "id": user.id,
+        "email": user.email
     }
