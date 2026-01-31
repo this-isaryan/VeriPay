@@ -201,6 +201,11 @@ export default function AnalysisPage() {
             PDF invoices include signature verification and AI scoring.
           </span>
         </div>
+        {selectedId && (
+          <p className="hint">
+            Selected invoice: <span className="mono">#{selectedId}</span>
+          </p>
+        )}
         {status ? <p className="status">{status}</p> : null}
       </section>
 
