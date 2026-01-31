@@ -15,6 +15,8 @@ export default function AppShell({
   const router = useRouter();
   const pathname = usePathname();
 
+  const isLoggedIn = userEmail !== "Guest";
+
   useEffect(() => {
     const stored = window.localStorage.getItem(USER_KEY);
     if (stored && stored.trim()) {
@@ -47,22 +49,18 @@ export default function AppShell({
           </div>
         </div>
         <nav className="sidebar-nav">
-          <Link href="/dashboard" className="nav-link">
-            Dashboard
-          </Link>
-          <Link href="/upload" className="nav-link">
-            Upload invoices
-          </Link>
-          <Link href="/analysis" className="nav-link">
-            Analysis
-          </Link>
-          <Link href="/login" className="nav-link">
-            Login
-          </Link>
-          <Link href="/register" className="nav-link">
-            Register
-          </Link>
+          <Link href="/dashboard" className="nav-link">Dashboard</Link>
+          <Link href="/upload" className="nav-link">Upload invoices</Link>
+          <Link href="/analysis" className="nav-link">Analysis</Link>
+
+          {!isLoggedIn && (
+            <>
+              <Link href="/login" className="nav-link">Login</Link>
+              <Link href="/register" className="nav-link">Register</Link>
+            </>
+          )}
         </nav>
+
       </aside>
 
       <div className="shell-main">
@@ -81,15 +79,20 @@ export default function AppShell({
             <Link href="/analysis" className="topbar-link">
               Analysis
             </Link>
-            <Link href="/register" className="topbar-link">
-              Create user
-            </Link>
-            <Link href="/login" className="topbar-link">
-              Sign in
-            </Link>
-            <button className="topbar-link logout" type="button" onClick={handleLogout}>
-              Logout
-            </button>
+            {!isLoggedIn ? (
+              <>
+                <Link href="/login" className="topbar-link">Sign in</Link>
+                <Link href="/register" className="topbar-link">Create user</Link>
+              </>
+            ) : (
+              <button
+                className="topbar-link logout"
+                type="button"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            )}
           </nav>
         </header>
         <div className="shell-content">{children}</div>
