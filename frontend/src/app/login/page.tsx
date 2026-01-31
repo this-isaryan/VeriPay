@@ -32,7 +32,8 @@ export default function LoginPage() {
       const data = await response.json();
       setStatus(data.message ?? "Login successful.");
       window.localStorage.setItem("veripay.userEmail", email);
-      router.push("/dashboard");
+      window.dispatchEvent(new Event("storage"));
+      router.push("/");
     } catch (_error) {
       setStatus("Unable to reach the API.");
     }

@@ -18,10 +18,22 @@ export default function AppShell({
   const isLoggedIn = userEmail !== "Guest";
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(USER_KEY);
-    if (stored && stored.trim()) {
-      setUserEmail(stored);
-    }
+    const syncUser = () => {
+      const stored = window.localStorage.getItem(USER_KEY);
+      if (stored && stored.trim()) {
+        setUserEmail(stored);
+      } else {
+        setUserEmail("Guest");
+      }
+    };
+
+    syncUser();
+
+    window.addEventListener("storage", syncUser);
+
+    return () => {
+      window.removeEventListener("storage", syncUser);
+    };
   }, []);
 
   const handleLogout = () => {
