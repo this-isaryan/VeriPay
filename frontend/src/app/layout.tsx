@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Source_Code_Pro } from "next/font/google";
 import "./globals.css";
 import AppShell from "./ui/AppShell";
+import RequireAuth from "./ui/RequireAuth";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-sans",
@@ -26,7 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${spaceGrotesk.variable} ${sourceCodePro.variable}`}>
-        <AppShell>{children}</AppShell>
+        <AppShell>
+          <RequireAuth>{children}</RequireAuth>
+        </AppShell>
       </body>
     </html>
   );
