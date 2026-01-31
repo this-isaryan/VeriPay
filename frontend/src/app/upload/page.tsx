@@ -31,13 +31,25 @@ export default function UploadPage() {
       setStatus("Uploading invoice...");
       const response = await fetch(`${API_BASE}/invoices/upload`, {
         method: "POST",
+        credentials: "include",
         body: formData,
       });
 
-      const data = await response.json();
+      let data: any = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+
+      if (response.status === 401) {
+        setStatus("Session expired. Please log in again.");
+        router.push("/login");
+        return;
+      }
 
       if (!response.ok) {
-        setStatus(data.detail ?? "Upload failed.");
+        setStatus(data?.detail ?? "Upload failed.");
         return;
       }
 

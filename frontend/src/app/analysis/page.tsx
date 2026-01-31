@@ -89,7 +89,9 @@ export default function AnalysisPage() {
   useEffect(() => {
     const loadInvoices = async () => {
       try {
-        const response = await fetch(`${API_BASE}/invoices/`);
+        const response = await fetch(`${API_BASE}/invoices/`, {
+          credentials: "include",
+        });
         if (!response.ok) {
           throw new Error("Unable to load invoices");
         }
@@ -131,10 +133,23 @@ export default function AnalysisPage() {
 
       const response = await fetch(
         `${API_BASE}/invoices/${selectedId}/analyze`,
-        { method: "POST" }
+        {
+          method: "POST",
+          credentials: "include",
+        }
       );
 
-      const data = (await response.json()) as AnalysisResult;
+      let data: AnalysisResult | null = null;
+      try {
+        data = (await response.json()) as AnalysisResult;
+      } catch {
+        data = null;
+      }
+
+      if (response.status === 401) {
+        setStatus("Session expired. Please log in again.");
+        return;
+      }
 
       if (!response.ok) {
         setStatus(data?.ai?.message ?? "Analysis failed.");
