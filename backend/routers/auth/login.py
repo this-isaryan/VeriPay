@@ -13,21 +13,24 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def login(
     request: Request,
     data: LoginRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     user = authenticate_user(db, data.email, data.password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    # ✅ CREATE SESSION
+    # 🔐 FORCE SESSION CREATION
+    request.session.clear()
     request.session["user_id"] = user.id
+
+    print("SESSION CONTENT:", dict(request.session))  # 👈 DEBUG LINE
 
     return {
         "message": "Login successful",
         "user": {
             "id": user.id,
-            "email": user.email
-        }
+            "email": user.email,
+        },
     }
 
 
