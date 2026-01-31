@@ -49,9 +49,24 @@ export default function AppShell({
           </div>
         </div>
         <nav className="sidebar-nav">
-          <Link href="/dashboard" className="nav-link">Dashboard</Link>
-          <Link href="/upload" className="nav-link">Upload invoices</Link>
-          <Link href="/analysis" className="nav-link">Analysis</Link>
+          <Link
+            href="/dashboard"
+            className={`nav-link ${pathname === "/dashboard" ? "active" : ""}`}
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/upload"
+            className={`nav-link ${pathname === "/upload" ? "active" : ""}`}
+          >
+            Upload invoices
+          </Link>
+          <Link
+            href="/analysis"
+            className={`nav-link ${pathname === "/analysis" ? "active" : ""}`}
+          >
+            Analysis
+          </Link>
 
           {!isLoggedIn && (
             <>
