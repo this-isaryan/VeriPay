@@ -13,22 +13,32 @@ export default function RequireAuth({
   const router = useRouter();
   const pathname = usePathname();
 
+  const isAuthRoute =
+    pathname === "/login" || pathname === "/register";
+
   useEffect(() => {
     if (loading) return;
 
-    const isAuthRoute =
-      pathname === "/login" || pathname === "/register";
-
+    // 🔒 Not logged in → block protected routes
     if (!user && !isAuthRoute) {
       router.replace("/login");
+      return;
     }
 
+    // 🚫 Logged in → block login/register
     if (user && isAuthRoute) {
       router.replace("/dashboard");
     }
-  }, [user, loading, pathname, router]);
+  }, [user, loading, isAuthRoute, router]);
 
-  if (loading) return null;
+  // ⏳ Prevent flicker while checking auth
+  if (loading) {
+    return (
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        Checking authentication…
+      </div>
+    );
+  }
 
   return <>{children}</>;
 }

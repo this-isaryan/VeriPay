@@ -68,7 +68,7 @@ export default function AppShell({
           <div className="topbar-left">
             <p className="topbar-label">Signed in</p>
             <p className="topbar-user">
-              {loading ? "Loading..." : user ? user.email : "Not signed in"}
+              {user ? user.email : ""}
             </p>
           </div>
           <nav className="topbar-nav">
