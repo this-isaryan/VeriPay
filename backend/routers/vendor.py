@@ -7,6 +7,8 @@ from cryptography.hazmat.primitives import serialization
 
 from models.vendor import Vendor
 from dependencies import get_db
+from dependencies import get_current_user
+from models.user import User
 
 router = APIRouter(
     prefix="/vendors",
@@ -16,6 +18,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def register_vendor(
+    user: User = Depends(get_current_user),
     vendor_name: str = Form(...),
     certificate: UploadFile = File(...),
     db: Session = Depends(get_db)
