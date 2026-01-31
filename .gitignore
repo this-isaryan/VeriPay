@@ -1,7 +1,8 @@
 # Python
 venv/
 __pycache__/
-*.pyc
+*.pyo
+*.pyd
 
 # Node / Next.js
 node_modules/
