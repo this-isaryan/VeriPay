@@ -66,6 +66,7 @@ export default function AnalysisPage() {
   const [selectedId, setSelectedId] = useState<string>(presetId ?? "");
   const [status, setStatus] = useState("");
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [isRunning, setIsRunning] = useState(false);
   const [autoRunTriggered, setAutoRunTriggered] = useState(false);
 
   const canAnalyze = useMemo(() => selectedId.trim().length > 0, [selectedId]);
@@ -109,23 +110,29 @@ export default function AnalysisPage() {
     }
 
     try {
+      setIsRunning(true);
       setStatus("Running analysis...");
       setResult(null);
+
       const response = await fetch(
         `${API_BASE}/invoices/${selectedId}/analyze`,
         { method: "POST" }
       );
+
       const data = (await response.json()) as AnalysisResult;
 
       if (!response.ok) {
         setStatus(data?.ai?.message ?? "Analysis failed.");
+        setIsRunning(false);
         return;
       }
 
       setResult(data);
       setStatus("Analysis complete.");
+      setIsRunning(false);
     } catch (_error) {
       setStatus("Unable to reach the API.");
+      setIsRunning(false);
     }
   };
 
@@ -167,8 +174,13 @@ export default function AnalysisPage() {
           </select>
         </div>
         <div className="actions">
-          <button className="button" type="button" onClick={handleAnalyze}>
-            Run analysis
+          <button
+            className="button"
+            type="button"
+            onClick={handleAnalyze}
+            disabled={isRunning}
+          >
+            {isRunning ? "Analyzing..." : "Run analysis"}
           </button>
           <span className="hint">
             PDF invoices include signature verification and AI scoring.
