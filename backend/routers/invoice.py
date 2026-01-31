@@ -15,6 +15,8 @@ from models.vendor import Vendor
 from dependencies import get_db
 from services.analysis_service import run_ai_analysis
 from services.rules_service import run_rules_checks
+from dependencies import get_current_user
+from models.user import User
 
 
 router = APIRouter(
@@ -33,7 +35,10 @@ INVOICE_DIR = "invoices"
 os.makedirs(INVOICE_DIR, exist_ok=True)
 
 @router.get("/")
-def list_invoices(db: Session = Depends(get_db)):
+def list_invoices(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     invoices = db.query(Invoice).order_by(Invoice.invoice_id.desc()).all()
     return [
         {
@@ -51,6 +56,7 @@ def list_invoices(db: Session = Depends(get_db)):
 
 @router.post("/upload")
 async def upload_invoice(
+    user: User = Depends(get_current_user),
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
@@ -120,10 +126,10 @@ async def upload_invoice(
         ).first()
 
     vendor_result = verify_vendor_identity(
-    signature_integrity=crypto_raw["signature_integrity"],
-    certificate_trust=crypto_raw["certificate_trust"],
-    signer_fingerprint=fingerprint,
-    vendor=vendor
+        signature_integrity=crypto_raw["signature_integrity"],
+        certificate_trust=crypto_raw["certificate_trust"],
+        signer_fingerprint=fingerprint,
+        vendor=vendor
     )
 
     crypto = {
@@ -158,9 +164,11 @@ async def upload_invoice(
 @router.post("/{invoice_id}/analyze")
 async def analyze_invoice(
     invoice_id: int,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    invoice = db.query(Invoice).filter(Invoice.invoice_id == invoice_id).first()
+    invoice = db.query(Invoice).filter(
+        Invoice.invoice_id == invoice_id).first()
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
 
