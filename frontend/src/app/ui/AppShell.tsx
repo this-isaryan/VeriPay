@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
 export default function AppShell({
   children,
@@ -11,7 +15,7 @@ export default function AppShell({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-
+  const { user, loading } = useAuth();
   const hideShell = pathname === "/login" || pathname === "/register";
 
   if (hideShell) {
@@ -49,7 +53,12 @@ export default function AppShell({
           >
             Analysis
           </Link>
-
+          {!loading && !user && (
+            <>
+              <Link href="/login" className="topbar-link">Login</Link>
+              <Link href="/register" className="topbar-link">Register</Link>
+            </>
+          )}
         </nav>
 
       </aside>
@@ -58,6 +67,9 @@ export default function AppShell({
         <header className="topbar">
           <div className="topbar-left">
             <p className="topbar-label">Signed in</p>
+            <p className="topbar-user">
+              {loading ? "Loading..." : user ? user.email : "Not signed in"}
+            </p>
           </div>
           <nav className="topbar-nav">
             <Link href="/dashboard" className="topbar-link">
@@ -69,6 +81,21 @@ export default function AppShell({
             <Link href="/analysis" className="topbar-link">
               Analysis
             </Link>
+            {!loading && user && (
+              <button
+                className="topbar-link logout"
+                type="button"
+                onClick={async () => {
+                  await fetch(`${API_BASE}/auth/logout`, {
+                    method: "POST",
+                    credentials: "include",
+                  });
+                  window.location.href = "/login";
+                }}
+              >
+                Logout
+              </button>
+            )}
           </nav>
         </header>
         <div className="shell-content">{children}</div>
