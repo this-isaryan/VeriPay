@@ -315,7 +315,14 @@ export default function AnalysisPage() {
             ) : null}
           </article>
         </section>
-      ) : null}
+      ) : (
+        <section className="card">
+          <p className="subtitle">
+            Select an invoice and click <strong>Run analysis</strong> to view
+            cryptographic verification, AI anomaly scores, and rule-based checks.
+          </p>
+        </section>
+      )}
 
       <p className="hint">
         API endpoint: <span className="mono">{API_BASE}</span>
