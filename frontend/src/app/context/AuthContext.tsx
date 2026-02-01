@@ -13,6 +13,7 @@ const API_BASE =
 type User = {
   id: number;
   email: string;
+  full_name: string;
 };
 
 type AuthContextType = {
