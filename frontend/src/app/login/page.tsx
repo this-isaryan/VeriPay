@@ -27,6 +27,7 @@ export default function LoginPage() {
       });
 
       if (!response.ok) {
+        await refresh();
         const error = await response.json();
         setStatus(error.detail ?? "Login failed.");
         return;

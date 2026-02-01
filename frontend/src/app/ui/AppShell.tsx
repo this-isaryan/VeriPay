@@ -15,7 +15,7 @@ export default function AppShell({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, loading } = useAuth();
+  const { user, loading, refresh } = useAuth();
   const hideShell = pathname === "/login" || pathname === "/register";
 
   if (hideShell) {
@@ -90,7 +90,8 @@ export default function AppShell({
                     method: "POST",
                     credentials: "include",
                   });
-                  window.location.href = "/login";
+                  await refresh();
+                  router.push("/login");
                 }}
               >
                 Logout
