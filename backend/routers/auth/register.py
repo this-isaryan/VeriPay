@@ -8,7 +8,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register")
 def register(data: RegisterRequest, db: Session = Depends(get_db)):
-    user = register_user(db, data.email, data.password)
+    user = register_user(db, data.email, data.password, data.full_name)
 
     if not user:
         raise HTTPException(status_code=400, detail="User already exists")
