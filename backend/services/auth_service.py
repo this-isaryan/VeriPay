@@ -1,7 +1,3 @@
-from sqlalchemy.orm import Session
-from models.user import User
-from utils.security import verify_password
-
 def authenticate_user(db: Session, email: str, password: str):
     user = db.query(User).filter(User.email == email).first()
 
@@ -11,8 +7,4 @@ def authenticate_user(db: Session, email: str, password: str):
     if not verify_password(password, user.hashed_password):
         return None
 
-    return {
-        "success": True,
-        "message": "Login successful",
-        "user_id": user.id
-    }
+    return user

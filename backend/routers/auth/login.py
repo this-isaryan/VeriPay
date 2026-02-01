@@ -23,8 +23,6 @@ def login(
     request.session.clear()
     request.session["user_id"] = user.id
 
-    print("SESSION CONTENT:", dict(request.session))  # 👈 DEBUG LINE
-
     return {
         "message": "Login successful",
         "user": {
