@@ -29,7 +29,11 @@ export default function LoginPage() {
       if (!response.ok) {
         await refresh();
         const error = await response.json();
-        setStatus(error.detail ?? "Login failed.");
+        if (Array.isArray(error.detail)) {
+          setStatus(error.detail.map((e: any) => e.msg).join(", "));
+        } else {
+          setStatus(error.detail ?? "Login failed.");
+        }
         return;
       }
 

@@ -18,15 +18,27 @@ export default function RegisterPage() {
     try {
       const response = await fetch(`${API_BASE}/auth/register`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          full_name: fullName,
+          email,
+          password,
+        }),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        setStatus(error.detail ?? "Registration failed.");
+
+        if (Array.isArray(error.detail)) {
+          setStatus(error.detail.map((e: any) => e.msg).join(", "));
+        } else {
+          setStatus(error.detail ?? "Registration failed.");
+        }
+
         return;
       }
+
 
       const data = await response.json();
       setStatus(data.message ?? "Account created.");

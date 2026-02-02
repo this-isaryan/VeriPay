@@ -43,5 +43,6 @@ def logout(request: Request):
 def me(user: User = Depends(get_current_user)):
     return {
         "id": user.id,
-        "email": user.email
+        "email": user.email,
+        "full_name": user.full_name,
     }
