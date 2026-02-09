@@ -3,8 +3,8 @@
 import React from "react"
 import { usePathname } from "next/navigation"
 
-// import Sidebar from "./Sidebar"
-// import Header from "./Header"
+import Sidebar from "./Sidebar"
+import Header from "./Header"
 
 export default function AppShell({
   children,
@@ -24,9 +24,9 @@ export default function AppShell({
 
   return (
     <div className="flex min-h-screen gap-6 p-6">
-      {/* <Sidebar /> */}
+      <Sidebar />
       <div className="flex flex-1 flex-col gap-4">
-        {/* <Header /> */}
+        <Header />
         <main className="flex-1">{children}</main>
       </div>
     </div>

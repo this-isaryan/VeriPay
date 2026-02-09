@@ -14,22 +14,22 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Bell, LogOut, Search, Settings, User } from "lucide-react"
 
-const router = useRouter()
-const { user, refresh } = useAuth()
-
 const API_BASE =
     process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
 
-async function handleLogout() {
-    await fetch(`${API_BASE}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-    })
-    await refresh()
-    router.push("/login")
-}
 
 export default function Header() {
+    const router = useRouter()
+    const { user, refresh } = useAuth()
+
+    async function handleLogout() {
+        await fetch(`${API_BASE}/auth/logout`, {
+            method: "POST",
+            credentials: "include",
+        })
+        await refresh()
+        router.push("/login")
+    }
     return (
         <header className="sticky top-0 z-30 flex items-center justify-between rounded-2xl bg-card/70 px-6 py-3 shadow-sm backdrop-blur-md">
             <div>
