@@ -1,99 +1,61 @@
-"use client";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "../context/AuthContext";
-
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Shield } from "lucide-react"
+import Link from "next/link"
+// import { VeriPayLogo } from "@/components/veripay-logo"
+import { LoginForm } from "@/components/login-form"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [status, setStatus] = useState("");
-  const router = useRouter();
-  const { refresh } = useAuth();
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setStatus("Signing in...");
-
-    try {
-      const response = await fetch(`${API_BASE}/auth/login`, {
-        method: "POST",
-        credentials: "include", // 🔴 REQUIRED
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        await refresh();
-        const error = await response.json();
-        if (Array.isArray(error.detail)) {
-          setStatus(error.detail.map((e: any) => e.msg).join(", "));
-        } else {
-          setStatus(error.detail ?? "Login failed.");
-        }
-        return;
-      }
-
-      const data = await response.json();
-      setStatus(data.message ?? "Login successful.");
-      await refresh();
-      router.push("/dashboard");
-    } catch (_error) {
-      setStatus("Unable to reach the API.");
-    }
-  };
-
   return (
-    <main className="page">
-      <section className="panel">
-        <span className="tag">Sign In</span>
-        <h1 className="title">Welcome back.</h1>
-        <p className="subtitle">
-          Access the invoice risk dashboard with your verified credentials.
-        </p>
-      </section>
+    <main className="relative flex min-h-svh items-center justify-center p-4">
+      {/* Subtle radial background glow */}
+      <div
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+        aria-hidden="true"
+      >
+        <div className="absolute left-1/2 top-0 h-[600px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-foreground/[0.03] blur-3xl" />
+      </div>
 
-      <section className="card">
-        <form className="form" onSubmit={handleSubmit}>
-          <div className="field">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="you@veripay.io"
-              required
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="••••••••"
-              required
-            />
-          </div>
-          <div className="actions">
-            <button className="button" type="submit">
-              Login
-            </button>
-            <a className="button outline" href="/register">
-              Create account
-            </a>
-          </div>
-          {status ? <p className="status">{status}</p> : null}
-        </form>
-      </section>
-      <p className="hint">
-        API endpoint: <span className="mono">{API_BASE}</span>
-      </p>
+      <div className="relative w-full max-w-[400px]">
+        {/* Glass morphism login card */}
+        <Card className="border-border/40 bg-card/65 shadow-2xl shadow-background/80 backdrop-blur-xl">
+          <CardHeader className="items-center gap-3 pb-2 pt-8">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
+              <Shield className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div className="flex flex-col items-center gap-1.5">
+              <CardTitle className="text-xl font-semibold tracking-tight text-foreground">
+                Sign in to VeriPay
+              </CardTitle>
+              <CardDescription className="text-center text-sm text-muted-foreground">
+                AI-powered invoice verification for modern finance teams
+              </CardDescription>
+            </div>
+          </CardHeader>
+
+          <CardContent className="px-7 pb-2 pt-4">
+            <LoginForm />
+          </CardContent>
+
+          <CardFooter className="justify-center pb-8 pt-4">
+            <p className="text-sm text-muted-foreground">
+              {"Don't have an account? "}
+              <Link
+                href="/register"
+                className="font-medium text-foreground transition-colors hover:text-foreground/80"
+              >
+                Create an account
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </div>
     </main>
-  );
+  )
 }
