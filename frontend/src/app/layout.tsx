@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import React from "react"
+import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Source_Code_Pro } from "next/font/google";
 import "./globals.css";
 import AppShell from "./ui/AppShell";
@@ -16,9 +17,16 @@ const sourceCodePro = Source_Code_Pro({
 });
 
 export const metadata: Metadata = {
-  title: "VeriPay Auth",
-  description: "Login and registration for the VeriPay system.",
-};
+  title: "VeriPay — AI Invoice Verification",
+  description:
+    "Track verifications, anomaly scores, and issuer trust signals across your finance workflow.",
+}
+
+export const viewport: Viewport = {
+  themeColor: "#1f5e5b",
+  width: "device-width",
+  initialScale: 1,
+}
 
 export default function RootLayout({
   children,
