@@ -91,8 +91,8 @@ export default function Header() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-48" align="end" sideOffset={8}>
                             <div className="px-2 py-1.5">
-                                <p className="text-sm font-medium text-foreground">Alex Johnson</p>
-                                <p className="text-xs text-muted-foreground">alex@veripay.io</p>
+                                <p className="text-sm font-medium text-foreground">{user?.full_name}</p>
+                                <p className="text-xs text-muted-foreground">{user?.email}</p>
                             </div>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem>
