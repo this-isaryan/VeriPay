@@ -19,7 +19,28 @@ export default function LoginPage() {
         className="pointer-events-none absolute inset-0 overflow-hidden"
         aria-hidden="true"
       >
-        <div className="absolute left-1/2 top-0 h-[600px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-foreground/[0.03] blur-3xl" />
+        <div
+  className="
+    absolute left-1/2 top-0
+    h-[600px] w-[800px]
+    -translate-x-1/2 -translate-y-1/2
+    rounded-full
+    bg-foreground/[0.04]
+    blur-3xl
+    dark:bg-primary/[0.10]
+  "
+/>
+<div
+  className="
+    absolute left-1/2 top-24
+    h-[400px] w-[600px]
+    -translate-x-1/2
+    rounded-full
+    bg-primary/[0.06]
+    blur-2xl
+    dark:bg-primary/[0.16]
+  "
+/>
       </div>
 
       <div className="relative w-full max-w-[400px]">
