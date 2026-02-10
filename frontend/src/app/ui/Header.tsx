@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "../context/AuthContext"
 import Link from "next/link"
@@ -23,6 +24,14 @@ export default function Header() {
     const { theme, setTheme } = useTheme()
     const router = useRouter()
     const { user, refresh } = useAuth()
+
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    if (!mounted) return null
 
     async function handleLogout() {
         await fetch(`${API_BASE}/auth/logout`, {
