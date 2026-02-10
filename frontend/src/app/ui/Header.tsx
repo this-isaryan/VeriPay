@@ -56,16 +56,20 @@ export default function Header() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() =>
-                        setTheme(theme === "dark" ? "light" : "dark")
-                    }
-                    className="text-muted-foreground hover:text-foreground"
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    className="text-muted-foreground hover:text-foreground transition-transform duration-150 active:scale-95"
                     aria-label="Toggle dark mode"
                 >
                     {theme === "dark" ? (
-                        <Sun className="h-4 w-4" />
+                        <Sun
+                            key="sun"
+                            className="h-4 w-4 animate-in zoom-in-95 fade-in duration-200"
+                        />
                     ) : (
-                        <Moon className="h-4 w-4" />
+                        <Moon
+                            key="moon"
+                            className="h-4 w-4 animate-in zoom-in-95 fade-in duration-200"
+                        />
                     )}
                 </Button>
 
