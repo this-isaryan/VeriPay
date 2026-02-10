@@ -12,13 +12,15 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Bell, LogOut, Search, Settings, User } from "lucide-react"
+import { Bell, LogOut, Search, Settings, User, Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
 
 const API_BASE =
     process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
 
 
 export default function Header() {
+    const { theme, setTheme } = useTheme()
     const router = useRouter()
     const { user, refresh } = useAuth()
 
@@ -51,6 +53,22 @@ export default function Header() {
                     <span className="sr-only">Notifications</span>
                     <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-destructive" />
                 </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() =>
+                        setTheme(theme === "dark" ? "light" : "dark")
+                    }
+                    className="text-muted-foreground hover:text-foreground"
+                    aria-label="Toggle dark mode"
+                >
+                    {theme === "dark" ? (
+                        <Sun className="h-4 w-4" />
+                    ) : (
+                        <Moon className="h-4 w-4" />
+                    )}
+                </Button>
+
                 <div className="mx-2 h-6 w-px bg-border/40" />
                 <div className="flex items-center gap-3">
                     <nav className="hidden items-center gap-1 md:flex">

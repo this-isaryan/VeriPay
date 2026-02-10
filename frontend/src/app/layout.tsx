@@ -5,6 +5,7 @@ import "./globals.css";
 import AppShell from "./ui/AppShell";
 import { AuthProvider } from "./context/AuthContext";
 import RequireAuth from "./ui/RequireAuth";
+import { ThemeProvider } from "@/components/theme-provider"
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-sans",
@@ -36,11 +37,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${spaceGrotesk.variable} ${sourceCodePro.variable}`}>
-        <AuthProvider>
-          <AppShell>
-            <RequireAuth>{children}</RequireAuth>
-          </AppShell>
-        </AuthProvider>
+        <ThemeProvider attribute="class"
+          defaultTheme="system"
+          enableSystem>
+          <AuthProvider>
+            <AppShell>
+              <RequireAuth>{children}</RequireAuth>
+            </AppShell>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
