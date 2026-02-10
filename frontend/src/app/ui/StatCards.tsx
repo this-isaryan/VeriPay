@@ -45,7 +45,19 @@ export default function StatCards() {
         return (
           <Card
             key={stat.label}
-            className="border-0 bg-card/70 shadow-sm backdrop-blur-sm"
+            className="
+    border-0
+    bg-card/70
+    backdrop-blur-sm
+    shadow-sm
+    transition-all
+    duration-200
+    hover:-translate-y-0.5
+    hover:shadow-md
+    motion-safe:animate-in
+    motion-safe:fade-in
+    motion-safe:slide-in-from-bottom-2
+  "
           >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -58,11 +70,10 @@ export default function StatCards() {
                 {stat.value}
               </p>
               <p
-                className={`mt-1 text-xs ${
-                  stat.trendUp
+                className={`mt-1 text-xs ${stat.trendUp
                     ? "text-primary"
                     : "text-muted-foreground"
-                }`}
+                  }`}
               >
                 {stat.trend}
               </p>

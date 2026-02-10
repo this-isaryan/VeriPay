@@ -20,7 +20,7 @@ export default function LoginPage() {
         aria-hidden="true"
       >
         <div
-  className="
+          className="
     absolute left-1/2 top-0
     h-[600px] w-[800px]
     -translate-x-1/2 -translate-y-1/2
@@ -30,9 +30,9 @@ export default function LoginPage() {
     dark:bg-primary/[0.12]
     motion-safe:animate-glow-in
   "
-/>
-<div
-  className="
+        />
+        <div
+          className="
     absolute left-1/2 top-24
     h-[400px] w-[600px]
     -translate-x-1/2
@@ -42,12 +42,23 @@ export default function LoginPage() {
     dark:bg-primary/[0.16]
     motion-safe:animate-glow-in
   "
-/>
+        />
       </div>
 
       <div className="relative w-full max-w-[400px]">
         {/* Glass morphism login card */}
-        <Card className="border-border/40 bg-card/65 shadow-2xl shadow-background/80 backdrop-blur-xl">
+        <Card
+          className="
+    border-border/40
+    bg-card/65
+    backdrop-blur-xl
+    shadow-2xl shadow-background/80
+    motion-safe:animate-in
+    motion-safe:fade-in
+    motion-safe:zoom-in-95
+    duration-300
+  "
+        >
           <CardHeader className="items-center gap-3 pb-2 pt-8">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
               <Shield className="h-5 w-5 text-primary-foreground" />

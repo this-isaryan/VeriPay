@@ -130,7 +130,14 @@ export default function InvoicesTable() {
           </TableHeader>
           <TableBody>
             {invoices.map((inv) => (
-              <TableRow key={inv.id}>
+              <TableRow
+                key={inv.id}
+                className="
+  transition-all
+  hover:bg-muted/40
+  hover:shadow-sm
+"
+              >
                 <TableCell className="font-mono text-xs font-medium text-foreground">
                   {inv.id}
                 </TableCell>

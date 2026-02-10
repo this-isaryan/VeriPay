@@ -43,7 +43,18 @@ export default function VerificationQueue() {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       {/* Live verification queue */}
-      <Card className="border-border/60 shadow-sm">
+      <Card
+        className="
+    border-border/60
+    shadow-sm
+    backdrop-blur-sm
+    transition-all
+    hover:shadow-md
+    motion-safe:animate-in
+    motion-safe:fade-in
+    motion-safe:slide-in-from-bottom-2
+  "
+      >
         <CardHeader>
           <CardTitle className="text-base font-semibold text-foreground">
             Live verification queue
@@ -53,7 +64,19 @@ export default function VerificationQueue() {
           {queueItems.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/30 px-4 py-3"
+              className="
+    flex items-center justify-between
+    rounded-xl
+    border border-border/60
+    bg-muted/30
+    px-4 py-3
+    transition-all
+    hover:bg-muted/50
+    hover:shadow-sm
+    motion-safe:animate-in
+    motion-safe:fade-in
+    motion-safe:slide-in-from-left-2
+  "
             >
               <div>
                 <p className="text-sm font-semibold text-foreground">
@@ -75,7 +98,18 @@ export default function VerificationQueue() {
       </Card>
 
       {/* Issuer trust distribution */}
-      <Card className="border-border/60 shadow-sm">
+      <Card
+        className="
+    border-border/60
+    shadow-sm
+    backdrop-blur-sm
+    transition-all
+    hover:shadow-md
+    motion-safe:animate-in
+    motion-safe:fade-in
+    motion-safe:slide-in-from-bottom-2
+  "
+      >
         <CardHeader>
           <CardTitle className="text-base font-semibold text-foreground">
             Issuer trust distribution
@@ -95,7 +129,17 @@ export default function VerificationQueue() {
       </Card>
 
       {/* Next actions */}
-      <Card className="border-border/60 shadow-sm lg:col-span-2">
+      <Card
+        className="
+    border-border/60
+    shadow-sm
+    backdrop-blur-sm
+    transition-all
+    hover:shadow-md
+    motion-safe:animate-in
+    motion-safe:fade-in
+    motion-safe:slide-in-from-bottom-2
+   lg:col-span-2">
         <CardHeader>
           <CardTitle className="text-base font-semibold text-foreground">
             Next actions
