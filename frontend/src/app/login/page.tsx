@@ -27,7 +27,8 @@ export default function LoginPage() {
     rounded-full
     bg-foreground/[0.04]
     blur-3xl
-    dark:bg-primary/[0.10]
+    dark:bg-primary/[0.12]
+    motion-safe:animate-glow-in
   "
 />
 <div
@@ -39,6 +40,7 @@ export default function LoginPage() {
     bg-primary/[0.06]
     blur-2xl
     dark:bg-primary/[0.16]
+    motion-safe:animate-glow-in
   "
 />
       </div>
