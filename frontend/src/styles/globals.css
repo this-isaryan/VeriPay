@@ -10,6 +10,11 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  .auth-success {
+    transform: scale(0.96);
+    opacity: 0;
+    transition: transform 300ms ease, opacity 300ms ease;
+  }
 }
 
 @layer base {

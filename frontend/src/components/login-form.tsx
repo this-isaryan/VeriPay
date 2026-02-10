@@ -7,6 +7,7 @@ import { useAuth } from "@/app/context/AuthContext"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Check } from "lucide-react"
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
@@ -16,6 +17,7 @@ export function LoginForm() {
   const [password, setPassword] = useState("")
   const [status, setStatus] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
 
   const router = useRouter()
   const { refresh } = useAuth()
@@ -36,58 +38,77 @@ export function LoginForm() {
       if (!response.ok) {
         await refresh()
         const error = await response.json()
-        if (Array.isArray(error.detail)) {
-          setStatus(error.detail.map((e: any) => e.msg).join(", "))
-        } else {
-          setStatus(error.detail ?? "Login failed.")
-        }
+        setStatus(
+          Array.isArray(error.detail)
+            ? error.detail.map((e: any) => e.msg).join(", ")
+            : error.detail ?? "Login failed."
+        )
         setLoading(false)
         return
       }
 
-      const data = await response.json()
-      setStatus(data.message ?? "Login successful.")
+      setStatus("Welcome back.")
       await refresh()
-      router.push("/dashboard")
+
+      // 🔥 trigger success animation
+      setSuccess(true)
+
+      // ⏳ smooth exit before redirect
+      setTimeout(() => {
+        router.push("/dashboard")
+      }, 500)
     } catch {
       setStatus("Unable to reach the API.")
-    } finally {
       setLoading(false)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className={`space-y-4 transition-all ${
+        success ? "auth-success" : ""
+      }`}
+    >
       <div className="space-y-1.5">
-        <Label htmlFor="email">Email</Label>
+        <Label>Email</Label>
         <Input
-          id="email"
           type="email"
           placeholder="you@veripay.io"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          disabled={success}
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="password">Password</Label>
+        <Label>Password</Label>
         <Input
-          id="password"
           type="password"
           placeholder="••••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          disabled={success}
         />
       </div>
 
       <Button
         type="submit"
-        className="w-full"
-        disabled={loading}
+        className="w-full flex items-center justify-center gap-2"
+        disabled={loading || success}
       >
-        {loading ? "Signing in…" : "Sign in"}
+        {success ? (
+          <>
+            <Check className="h-4 w-4" />
+            Signed in
+          </>
+        ) : loading ? (
+          "Signing in…"
+        ) : (
+          "Sign in"
+        )}
       </Button>
 
       {status && (

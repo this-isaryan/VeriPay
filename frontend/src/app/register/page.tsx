@@ -20,6 +20,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [status, setStatus] = useState("")
+  const [success, setSuccess] = useState(false)
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -48,7 +49,13 @@ export default function RegisterPage() {
       }
 
       const data = await response.json()
-      setStatus(data.message ?? "Account created successfully.")
+      setStatus(data.message ?? "Account created.")
+      setSuccess(true)
+
+      setTimeout(() => {
+        window.location.href = "/login"
+      }, 500)
+
     } catch {
       setStatus("Unable to reach the API.")
     }
@@ -115,7 +122,11 @@ export default function RegisterPage() {
           </CardHeader>
 
           <CardContent className="px-7 pb-2 pt-4">
-            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            <form
+              onSubmit={handleSubmit}
+              className={`flex flex-col gap-4 transition-all ${success ? "auth-success" : ""
+                }`}
+            >
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-foreground">
                   Full name
