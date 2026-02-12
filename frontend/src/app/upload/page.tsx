@@ -1,153 +1,328 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import React, { useState, useRef, useCallback } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Switch } from "@/components/ui/switch"
+
+import {
+  UploadCloud,
+  FileText,
+  CheckCircle2,
+  ArrowRight,
+  BarChart3,
+} from "lucide-react"
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
+
+type UploadResult = {
+  invoiceId: string
+  fileType: string
+  status: string
+  fileHash: string
+  fileName: string
+}
 
 export default function UploadPage() {
-  const [file, setFile] = useState<File | null>(null);
-  const [status, setStatus] = useState("");
-  const [result, setResult] = useState<Record<string, unknown> | null>(null);
-  const [autoAnalyze, setAutoAnalyze] = useState(true);
-  const router = useRouter();
+  const router = useRouter()
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setStatus("");
-    setResult(null);
+  const [isDragging, setIsDragging] = useState(false)
+  const [analyzeImmediately, setAnalyzeImmediately] = useState(true)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadResult, setUploadResult] = useState<UploadResult | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-    if (!file) {
-      setStatus("Please choose a PDF or image file first.");
-      return;
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const acceptedTypes = ["application/pdf", "image/png", "image/jpeg"]
+
+  const handleFile = useCallback((file: File) => {
+    if (!acceptedTypes.includes(file.type)) {
+      setError("Only PDF, PNG, and JPG files are allowed.")
+      return
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
+    setSelectedFile(file)
+    setUploadResult(null)
+    setError(null)
+  }, [])
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      setIsDragging(false)
+      const file = e.dataTransfer.files[0]
+      if (file) handleFile(file)
+    },
+    [handleFile]
+  )
+
+  const handleUpload = useCallback(async () => {
+    if (!selectedFile) {
+      setError("Please choose a file first.")
+      return
+    }
+
+    setIsUploading(true)
+    setError(null)
+
+    const formData = new FormData()
+    formData.append("file", selectedFile)
 
     try {
-      setStatus("Uploading invoice...");
       const response = await fetch(`${API_BASE}/invoices/upload`, {
         method: "POST",
         credentials: "include",
         body: formData,
-      });
+      })
 
-      let data: any = null;
+      let data: any = null
       try {
-        data = await response.json();
+        data = await response.json()
       } catch {
-        data = null;
+        data = null
       }
 
       if (response.status === 401) {
-        setStatus("Session expired. Please log in again.");
-        router.push("/login");
-        return;
+        router.push("/login")
+        return
       }
 
       if (!response.ok) {
-        setStatus(data?.detail ?? "Upload failed.");
-        return;
+        setError(data?.detail ?? "Upload failed.")
+        return
       }
 
-      setResult(data);
-      setStatus("Upload complete.");
-      if (autoAnalyze) {
-        const invoiceId = String(data.invoice_id);
-        router.push(`/analysis?invoiceId=${invoiceId}&run=1`);
+      const mappedResult: UploadResult = {
+        invoiceId: String(data.invoice_id),
+        fileType: String(data.file_type ?? selectedFile.type),
+        status: String(data.status ?? "Queued"),
+        fileHash: String(data.file_hash),
+        fileName: selectedFile.name,
       }
-    } catch (_error) {
-      setStatus("Unable to reach the API.");
+
+      setUploadResult(mappedResult)
+      setSelectedFile(null)
+
+      if (analyzeImmediately) {
+        setTimeout(() => {
+          router.push(
+            `/analysis?invoiceId=${data.invoice_id}&run=1`
+          )
+        }, 800)
+      }
+    } catch {
+      setError("Unable to reach the API.")
+    } finally {
+      setIsUploading(false)
     }
-  };
-
+  }, [selectedFile, analyzeImmediately, router])
   return (
-    <main className="page">
-      <section className="panel">
-        <span className="tag">Upload</span>
-        <h1 className="title">Submit an invoice for verification.</h1>
-        <p className="subtitle">
-          Upload a PDF or image to run integrity checks, hash matching, and
-          signer validation.
-        </p>
-      </section>
+      <div className="relative flex flex-col gap-8">
 
-      <section className="card upload-card">
-        <form className="form" onSubmit={handleSubmit}>
-          <div className="field">
-            <label htmlFor="invoice">Invoice file</label>
-            <input
-              id="invoice"
-              type="file"
-              accept=".pdf,.png,.jpg,.jpeg"
-              onChange={(event) =>
-                setFile(event.target.files ? event.target.files[0] : null)
-              }
-              className="file-input"
-              required
-            />
-          </div>
-          <div className="actions">
-            <button className="button" type="submit">
-              Upload invoice
-            </button>
-            <span className="hint">
-              Allowed: PDF, PNG, JPG • Max size per browser limits
-            </span>
-          </div>
-          <label className="toggle">
-            <input
-              type="checkbox"
-              checked={autoAnalyze}
-              onChange={(event) => setAutoAnalyze(event.target.checked)}
-            />
-            <span>Analyze immediately after upload</span>
-          </label>
-          {status ? <p className="status">{status}</p> : null}
-        </form>
-      </section>
+        {/* Glow */}
+        <div className="pointer-events-none absolute -top-32 left-1/2 h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-primary/[0.04] blur-3xl" />
 
-      {result ? (
-        <section className="card">
-          <h3>Upload summary</h3>
-          <div className="upload-summary">
-            <div>
-              <p className="metric-label">Status</p>
-              <p className="metric-value">{String(result.status)}</p>
-            </div>
-            <div>
-              <p className="metric-label">Invoice ID</p>
-              <p className="metric-value">{String(result.invoice_id)}</p>
-            </div>
-            <div>
-              <p className="metric-label">File type</p>
-              <p className="metric-value">{String(result.file_type)}</p>
-            </div>
-          </div>
-          <div className="upload-meta">
-            <p className="metric-label">File hash</p>
-            <p className="mono">{String(result.file_hash)}</p>
-          </div>
-          <div className="dashboard-actions">
-            <Link
-              className="button"
-              href={`/analysis?invoiceId=${String(result.invoice_id)}`}
-            >
-              Analyze this invoice
-            </Link>
-            <Link className="button outline" href="/analysis">
-              Go to analysis page
-            </Link>
-          </div>
+        {/* Hero */}
+        <section className="relative flex flex-col gap-3">
+          <Badge
+            variant="secondary"
+            className="w-fit text-xs font-medium uppercase tracking-wider text-muted-foreground"
+          >
+            Upload
+          </Badge>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground lg:text-4xl">
+            Submit an invoice for verification.
+          </h1>
+          <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
+            Upload a PDF or image. VeriPay will extract metadata, compute a hash,
+            and queue it for anomaly analysis.
+          </p>
         </section>
-      ) : null}
 
-      <p className="hint">
-        API endpoint: <span className="mono">{API_BASE}</span>
-      </p>
-    </main>
-  );
+        {/* Upload Zone */}
+        {!uploadResult && (
+          <div className="flex flex-col gap-6">
+
+            <Card className="border-0 bg-card/65 shadow-sm backdrop-blur-xl">
+              <CardContent className="p-0">
+                <button
+                  type="button"
+                  onClick={() => inputRef.current?.click()}
+                  onDrop={handleDrop}
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    setIsDragging(true)
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault()
+                    setIsDragging(false)
+                  }}
+                  className={`flex w-full flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed p-12 transition-colors ${isDragging
+                      ? "border-primary/60 bg-primary/[0.04]"
+                      : "border-border/50 hover:border-primary/40 hover:bg-primary/[0.02]"
+                    }`}
+                >
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+                    <UploadCloud className="h-7 w-7 text-primary" />
+                  </div>
+
+                  {selectedFile ? (
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium text-foreground">
+                          {selectedFile.name}
+                        </span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {(selectedFile.size / 1024).toFixed(1)} KB
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-1">
+                      <p className="text-sm font-medium text-foreground">
+                        Drag & drop invoice here or click to browse
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Accepted: PDF, PNG, JPG
+                      </p>
+                    </div>
+                  )}
+                </button>
+
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleFile(file)
+                  }}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Controls */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <Switch
+                  checked={analyzeImmediately}
+                  onCheckedChange={setAnalyzeImmediately}
+                />
+                <span className="text-sm font-medium text-foreground">
+                  Analyze immediately after upload
+                </span>
+              </label>
+
+              <Button
+                onClick={handleUpload}
+                disabled={!selectedFile || isUploading}
+                className="gap-2"
+              >
+                {isUploading ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <UploadCloud className="h-4 w-4" />
+                    Upload invoice
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {error && (
+              <p className="text-sm text-destructive">{error}</p>
+            )}
+          </div>
+        )}
+        {uploadResult && (
+          <Card className="border-0 bg-card/65 shadow-sm backdrop-blur-xl">
+            <CardContent className="flex flex-col gap-6 p-6">
+
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    Invoice uploaded successfully
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {uploadResult.fileName}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <SummaryField label="Invoice ID" value={uploadResult.invoiceId} />
+                <SummaryField label="File Type" value={uploadResult.fileType} />
+                <SummaryField label="Status" value={uploadResult.status} />
+                <div className="flex flex-col gap-1">
+                  <span className="text-[11px] uppercase text-muted-foreground">
+                    File Hash
+                  </span>
+                  <span className="truncate font-mono text-sm text-foreground">
+                    {uploadResult.fileHash}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <Button
+                  onClick={() =>
+                    router.push(
+                      `/analysis?invoiceId=${uploadResult.invoiceId}`
+                    )
+                  }
+                  className="gap-2"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  Analyze invoice
+                </Button>
+
+                <Link href="/analysis">
+                  <Button variant="outline" className="gap-2 bg-transparent">
+                    Go to analysis
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+
+                <Button
+                  variant="ghost"
+                  className="ml-auto text-muted-foreground hover:text-foreground"
+                  onClick={() => setUploadResult(null)}
+                >
+                  Upload another
+                </Button>
+              </div>
+
+            </CardContent>
+          </Card>
+        )}
+      </div>
+  )
+}
+
+function SummaryField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-[11px] uppercase text-muted-foreground">
+        {label}
+      </span>
+      <span className="text-sm font-medium text-foreground">
+        {value}
+      </span>
+    </div>
+  )
 }
