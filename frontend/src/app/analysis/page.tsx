@@ -549,220 +549,264 @@ export default function AnalysisPage() {
       </Card>
 
       {/* Results grid */}
-      {isRunning ? (
-        // 1️⃣ SHOW SKELETON ONLY WHILE ANALYZING
-        <div className="grid gap-6 lg:grid-cols-3">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </div>
-      ) : result ? (
+      <div className="relative min-h-[420px]">
+        {/* Skeleton Layer */}
         <div
-          className=" grid gap-6 lg:grid-cols-3 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 duration-300">
+          className={`
+      absolute inset-0
+      transition-opacity duration-300
+      ${isRunning ? "opacity-100" : "opacity-0 pointer-events-none"}
+    `}
+        >
+          <div className="grid gap-6 lg:grid-cols-3">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        </div>
 
-          {/* --- Cryptographic Verification --- */}
-          <Card className="border-0 bg-card/65 shadow-sm backdrop-blur-xl">
-            <CardContent className="flex flex-col gap-4 p-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-                  <ShieldCheck className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="text-sm font-semibold text-foreground">
-                  Cryptographic verification
-                </h3>
-              </div>
-
-              <div className="divide-y divide-border/40">
-                <MetricRow
-                  label="Signature present"
-                  value={String(result.crypto.signature_present)}
-                />
-                <MetricRow
-                  label="Signature integrity"
-                  value={result.crypto.signature_integrity}
-                />
-                <CryptoTrustBar trust={result.crypto.certificate_trust} />
-                <MetricRow
-                  label="Certificate trust"
-                  value={result.crypto.certificate_trust}
-                />
-              </div>
-
-              {result.crypto.signer_fingerprint && (
-                <div className="flex flex-col gap-1 rounded-lg bg-muted/50 px-3 py-2">
-                  <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    <Fingerprint className="h-3 w-3" />
-                    Signer fingerprint
-                  </span>
-                  <span className="truncate font-mono text-xs text-foreground">
-                    {result.crypto.signer_fingerprint}
-                  </span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* --- AI Anomaly Analysis --- */}
-          <Card className="border-0 bg-card/65 shadow-sm backdrop-blur-xl">
-            <CardContent className="flex flex-col gap-4 p-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-                  <Brain className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-semibold text-foreground">
-                    AI anomaly analysis
-                  </h3>
-                  {aiStatusPill()}
-                </div>
-              </div>
-
-              {result.ai.status !== "ok" ? (
-                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                  {result.ai.message ??
-                    "AI analysis did not return a usable result."}
-                </p>
-              ) : (
-                <div className="divide-y divide-border/40">
-                  <AnomalyScoreBar score={result.ai.anomaly_score} />
-                  <div className="flex items-center justify-between py-2">
-                    <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                      Risk level
-                    </span>
-                    <RiskPill level={result.ai.risk_level} />
+        {/* Results / Empty Layer */}
+        <div
+          className={`
+      transition-opacity duration-500
+      ${!isRunning ? "opacity-100" : "opacity-0"}
+    `}
+        >
+          {result ? (
+            <div className="grid gap-6 lg:grid-cols-3">
+              {/* --- Cryptographic Verification --- */}
+              <Card
+                className="
+    border-0 bg-card/65 shadow-sm backdrop-blur-xl
+    motion-safe:animate-in
+    motion-safe:fade-in
+    motion-safe:zoom-in-95
+    duration-500
+    delay-75
+  "
+              >
+                <CardContent className="flex flex-col gap-4 p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                      <ShieldCheck className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-foreground">
+                      Cryptographic verification
+                    </h3>
                   </div>
-                  <MetricRow
-                    label="Review required"
-                    value={String(result.ai.review_required)}
-                  />
-                  <MetricRow
-                    label="Embedding distance"
-                    value={String(result.ai.embedding_distance)}
-                  />
-                  <MetricRow
-                    label="Distance z-score"
-                    value={String(result.ai.distance_z_score)}
-                  />
-                </div>
-              )}
 
-              {result.ai.explanations?.length ? (
-                <ul className="flex flex-col gap-1.5 rounded-lg bg-muted/50 px-3 py-2">
-                  {result.ai.explanations.map((note, idx) => (
-                    <li
-                      key={`${idx}-${note}`}
-                      className="text-xs leading-relaxed text-muted-foreground"
-                    >
-                      &bull; {note}
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </CardContent>
-          </Card>
+                  <div className="divide-y divide-border/40">
+                    <MetricRow
+                      label="Signature present"
+                      value={String(result.crypto.signature_present)}
+                    />
+                    <MetricRow
+                      label="Signature integrity"
+                      value={result.crypto.signature_integrity}
+                    />
+                    <CryptoTrustBar trust={result.crypto.certificate_trust} />
+                    <MetricRow
+                      label="Certificate trust"
+                      value={result.crypto.certificate_trust}
+                    />
+                  </div>
 
-          {/* --- Rule-based checks --- */}
-          <Card className="border-0 bg-card/65 shadow-sm backdrop-blur-xl">
-            <CardContent className="flex flex-col gap-4 p-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-                  <ClipboardCheck className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="text-sm font-semibold text-foreground">
-                  Rule-based checks
-                </h3>
-              </div>
+                  {result.crypto.signer_fingerprint && (
+                    <div className="flex flex-col gap-1 rounded-lg bg-muted/50 px-3 py-2">
+                      <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                        <Fingerprint className="h-3 w-3" />
+                        Signer fingerprint
+                      </span>
+                      <span className="truncate font-mono text-xs text-foreground">
+                        {result.crypto.signer_fingerprint}
+                      </span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-              {result.rules.status !== "ok" && (
-                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                  {result.rules.message ??
-                    `Rules status: ${result.rules.status}`}
-                </p>
-              )}
+              {/* --- AI Anomaly Analysis --- */}
+              <Card
+                className="
+    border-0 bg-card/65 shadow-sm backdrop-blur-xl
+    motion-safe:animate-in
+    motion-safe:fade-in
+    motion-safe:zoom-in-95
+    duration-500
+    delay-150
+  "
+              >
 
-              <div className="divide-y divide-border/40">
-                <MetricRow
-                  label="Word count"
-                  value={String(result.rules.word_count ?? "N/A")}
-                />
-                <MetricRow
-                  label="Font count"
-                  value={String(result.rules.font_count ?? "N/A")}
-                />
-                <MetricRow
-                  label="Line items"
-                  value={String(result.rules.line_item_count ?? "N/A")}
-                />
-                <MetricRow
-                  label="Line item sum"
-                  value={String(result.rules.line_item_sum ?? "N/A")}
-                />
-                <MetricRow
-                  label="Subtotal"
-                  value={String(result.rules.subtotal ?? "N/A")}
-                />
-                <MetricRow
-                  label="Tax"
-                  value={String(result.rules.tax ?? "N/A")}
-                />
-                <MetricRow
-                  label="Total"
-                  value={String(result.rules.total ?? "N/A")}
-                />
-              </div>
+                <CardContent className="flex flex-col gap-4 p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                      <Brain className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-semibold text-foreground">
+                        AI anomaly analysis
+                      </h3>
+                      {aiStatusPill()}
+                    </div>
+                  </div>
 
-              {result.rules.checks && (
-                <ul className="flex flex-col gap-1.5 rounded-lg bg-muted/50 px-3 py-2">
-                  <li className="text-xs text-muted-foreground">
-                    Subtotal vs items:{" "}
-                    <span className="font-medium text-foreground">
-                      {String(result.rules.checks.subtotal_matches_items)}
-                    </span>
-                  </li>
-                  <li className="text-xs text-muted-foreground">
-                    {"Total vs subtotal+tax: "}
-                    <span className="font-medium text-foreground">
-                      {String(
-                        result.rules.checks.total_matches_subtotal_tax
-                      )}
-                    </span>
-                  </li>
-                  <li className="text-xs text-muted-foreground">
-                    Subtotal delta:{" "}
-                    <span className="font-medium text-foreground">
-                      {result.rules.checks.subtotal_delta ?? "N/A"}
-                    </span>
-                  </li>
-                  <li className="text-xs text-muted-foreground">
-                    Total delta:{" "}
-                    <span className="font-medium text-foreground">
-                      {result.rules.checks.total_delta ?? "N/A"}
-                    </span>
-                  </li>
-                </ul>
-              )}
-            </CardContent>
-          </Card>
+                  {result.ai.status !== "ok" ? (
+                    <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <AlertTriangle className="h-3.5 w-3.5" />
+                      {result.ai.message ??
+                        "AI analysis did not return a usable result."}
+                    </p>
+                  ) : (
+                    <div className="divide-y divide-border/40">
+                      <AnomalyScoreBar score={result.ai.anomaly_score} />
+                      <div className="flex items-center justify-between py-2">
+                        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                          Risk level
+                        </span>
+                        <RiskPill level={result.ai.risk_level} />
+                      </div>
+                      <MetricRow
+                        label="Review required"
+                        value={String(result.ai.review_required)}
+                      />
+                      <MetricRow
+                        label="Embedding distance"
+                        value={String(result.ai.embedding_distance)}
+                      />
+                      <MetricRow
+                        label="Distance z-score"
+                        value={String(result.ai.distance_z_score)}
+                      />
+                    </div>
+                  )}
+
+                  {result.ai.explanations?.length ? (
+                    <ul className="flex flex-col gap-1.5 rounded-lg bg-muted/50 px-3 py-2">
+                      {result.ai.explanations.map((note, idx) => (
+                        <li
+                          key={`${idx}-${note}`}
+                          className="text-xs leading-relaxed text-muted-foreground"
+                        >
+                          &bull; {note}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </CardContent>
+              </Card>
+
+              {/* --- Rule-based checks --- */}
+              <Card
+                className="
+    border-0 bg-card/65 shadow-sm backdrop-blur-xl
+    motion-safe:animate-in
+    motion-safe:fade-in
+    motion-safe:zoom-in-95
+    duration-500
+    delay-300
+  "
+              >
+
+                <CardContent className="flex flex-col gap-4 p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                      <ClipboardCheck className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-foreground">
+                      Rule-based checks
+                    </h3>
+                  </div>
+
+                  {result.rules.status !== "ok" && (
+                    <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <AlertTriangle className="h-3.5 w-3.5" />
+                      {result.rules.message ??
+                        `Rules status: ${result.rules.status}`}
+                    </p>
+                  )}
+
+                  <div className="divide-y divide-border/40">
+                    <MetricRow
+                      label="Word count"
+                      value={String(result.rules.word_count ?? "N/A")}
+                    />
+                    <MetricRow
+                      label="Font count"
+                      value={String(result.rules.font_count ?? "N/A")}
+                    />
+                    <MetricRow
+                      label="Line items"
+                      value={String(result.rules.line_item_count ?? "N/A")}
+                    />
+                    <MetricRow
+                      label="Line item sum"
+                      value={String(result.rules.line_item_sum ?? "N/A")}
+                    />
+                    <MetricRow
+                      label="Subtotal"
+                      value={String(result.rules.subtotal ?? "N/A")}
+                    />
+                    <MetricRow
+                      label="Tax"
+                      value={String(result.rules.tax ?? "N/A")}
+                    />
+                    <MetricRow
+                      label="Total"
+                      value={String(result.rules.total ?? "N/A")}
+                    />
+                  </div>
+
+                  {result.rules.checks && (
+                    <ul className="flex flex-col gap-1.5 rounded-lg bg-muted/50 px-3 py-2">
+                      <li className="text-xs text-muted-foreground">
+                        Subtotal vs items:{" "}
+                        <span className="font-medium text-foreground">
+                          {String(result.rules.checks.subtotal_matches_items)}
+                        </span>
+                      </li>
+                      <li className="text-xs text-muted-foreground">
+                        {"Total vs subtotal+tax: "}
+                        <span className="font-medium text-foreground">
+                          {String(
+                            result.rules.checks.total_matches_subtotal_tax
+                          )}
+                        </span>
+                      </li>
+                      <li className="text-xs text-muted-foreground">
+                        Subtotal delta:{" "}
+                        <span className="font-medium text-foreground">
+                          {result.rules.checks.subtotal_delta ?? "N/A"}
+                        </span>
+                      </li>
+                      <li className="text-xs text-muted-foreground">
+                        Total delta:{" "}
+                        <span className="font-medium text-foreground">
+                          {result.rules.checks.total_delta ?? "N/A"}
+                        </span>
+                      </li>
+                    </ul>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <div className="grid gap-6 lg:grid-cols-3">
+              <EmptyCard
+                icon={ShieldCheck}
+                title="Cryptographic verification results will appear here."
+              />
+              <EmptyCard
+                icon={Brain}
+                title="AI anomaly analysis results will appear here."
+              />
+              <EmptyCard
+                icon={ClipboardCheck}
+                title="Rule-based check results will appear here."
+              />
+            </div>
+          )}
         </div>
-      ) : (
-        /* Empty state */
-        <div className="grid gap-6 lg:grid-cols-3">
-          <EmptyCard
-            icon={ShieldCheck}
-            title="Cryptographic verification results will appear here."
-          />
-          <EmptyCard
-            icon={Brain}
-            title="AI anomaly analysis results will appear here."
-          />
-          <EmptyCard
-            icon={ClipboardCheck}
-            title="Rule-based check results will appear here."
-          />
-        </div>
-      )}
+      </div>
 
       {/* Footer hint */}
       <p className="text-xs text-muted-foreground">
