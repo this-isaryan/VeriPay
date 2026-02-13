@@ -183,6 +183,64 @@ function RiskPill({ level }: { level?: string }) {
   )
 }
 
+function AnomalyScoreBar({ score }: { score?: number }) {
+  const [animatedValue, setAnimatedValue] = useState(0)
+
+  useEffect(() => {
+    if (score === undefined || score === null) return
+
+    let start = 0
+    const end = Math.min(Math.max(score * 100, 0), 100)
+    const duration = 900
+    const startTime = performance.now()
+
+    function animate(currentTime: number) {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
+
+      setAnimatedValue(start + (end - start) * eased)
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      }
+    }
+
+    requestAnimationFrame(animate)
+  }, [score])
+
+  if (score === undefined || score === null) return null
+
+  const percentage = animatedValue
+
+  let color =
+    percentage >= 70
+      ? "bg-red-500"
+      : percentage >= 40
+      ? "bg-amber-500"
+      : "bg-emerald-500"
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          Anomaly score
+        </span>
+        <span className="text-sm font-semibold text-foreground">
+          {(percentage / 100).toFixed(2)}
+        </span>
+      </div>
+
+      <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className={`h-full rounded-full ${color}`}
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
+  )
+}
+
 /* ------------------------------------------------------------------ */
 /*  Main page                                                          */
 /* ------------------------------------------------------------------ */
@@ -462,10 +520,7 @@ export default function AnalysisPage() {
                 </p>
               ) : (
                 <div className="divide-y divide-border/40">
-                  <MetricRow
-                    label="Anomaly score"
-                    value={String(result.ai.anomaly_score)}
-                  />
+                  <AnomalyScoreBar score={result.ai.anomaly_score} />
                   <div className="flex items-center justify-between py-2">
                     <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                       Risk level
