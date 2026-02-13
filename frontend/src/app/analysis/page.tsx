@@ -413,7 +413,14 @@ export default function AnalysisPage() {
       <div className="pointer-events-none absolute -top-32 left-1/2 h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-primary/[0.04] blur-3xl" />
 
       {/* Hero */}
-      <section className="relative flex flex-col gap-3">
+      <section className="relative flex flex-col gap-3 overflow-hidden rounded-2xl px-6 py-8">
+
+        {/* Gradient background */}
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent dark:from-primary/10" />
+          <div className="absolute -top-24 left-1/2 h-[300px] w-[600px] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl opacity-40 dark:opacity-60" />
+        </div>
+
         <Badge
           variant="secondary"
           className="w-fit text-xs font-medium uppercase tracking-wider text-muted-foreground"
