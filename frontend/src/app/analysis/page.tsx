@@ -1,371 +1,578 @@
-"use client";
+"use client"
 
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react"
+import { useSearchParams } from "next/navigation"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  ShieldCheck,
+  Brain,
+  ClipboardCheck,
+  Play,
+  Loader2,
+  Info,
+  Fingerprint,
+  AlertTriangle,
+} from "lucide-react"
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
+
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
 
 type InvoiceSummary = {
-  invoice_id: number;
-  status: string;
-  file_hash: string;
-  is_signed: boolean;
-  crypto_valid: boolean | null;
-  signer_fingerprint: string | null;
-  created_at: string;
-};
+  invoice_id: number
+  status: string
+  file_hash: string
+  is_signed: boolean
+  crypto_valid: boolean | null
+  signer_fingerprint: string | null
+  created_at: string
+}
 
 type AnalysisResult = {
-  invoice_id: number;
-  file_type: string;
+  invoice_id: number
+  file_type: string
   crypto: {
-    signature_present: boolean;
-    signature_integrity: string;
-    certificate_trust: string;
-    signer_fingerprint: string | null;
-    vendor_status?: string;
-    signer_identity?: string;
-  };
+    signature_present: boolean
+    signature_integrity: string
+    certificate_trust: string
+    signer_fingerprint: string | null
+    vendor_status?: string
+    signer_identity?: string
+  }
   ai: {
-    status: string;
-    message?: string;
-    anomaly_score?: number;
-    risk_level?: string;
-    review_required?: boolean;
-    embedding_distance?: number;
-    distance_z_score?: number;
-    explanations?: string[];
-  };
+    status: string
+    message?: string
+    anomaly_score?: number
+    risk_level?: string
+    review_required?: boolean
+    embedding_distance?: number
+    distance_z_score?: number
+    explanations?: string[]
+  }
   rules: {
-    status: string;
-    message?: string;
-    word_count?: number;
-    font_count?: number;
-    fonts?: string[];
-    line_item_count?: number;
-    line_item_sum?: number | null;
-    subtotal?: number | null;
-    tax?: number | null;
-    total?: number | null;
+    status: string
+    message?: string
+    word_count?: number
+    font_count?: number
+    fonts?: string[]
+    line_item_count?: number
+    line_item_sum?: number | null
+    subtotal?: number | null
+    tax?: number | null
+    total?: number | null
     checks?: {
-      subtotal_matches_items?: boolean | null;
-      subtotal_delta?: number | null;
-      total_matches_subtotal_tax?: boolean | null;
-      total_delta?: number | null;
-    };
-  };
-};
+      subtotal_matches_items?: boolean | null
+      subtotal_delta?: number | null
+      total_matches_subtotal_tax?: boolean | null
+      total_delta?: number | null
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Reusable pieces                                                    */
+/* ------------------------------------------------------------------ */
+
+function MetricRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between py-2">
+      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <span className="text-sm font-medium text-foreground">{value}</span>
+    </div>
+  )
+}
+
+function StatusPill({
+  status,
+  label,
+}: {
+  status: "success" | "warning" | "danger"
+  label: string
+}) {
+  const styles = {
+    success: "bg-primary/10 text-primary",
+    warning: "bg-accent/20 text-accent-foreground",
+    danger: "bg-destructive/10 text-destructive",
+  }
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${styles[status]}`}
+    >
+      {label}
+    </span>
+  )
+}
+
+function EmptyCard({
+  icon: Icon,
+  title,
+}: {
+  icon: React.ElementType
+  title: string
+}) {
+  return (
+    <Card className="
+  border-0
+  bg-card/65
+  shadow-sm
+  backdrop-blur-xl
+  transition-all
+  duration-200
+  hover:shadow-lg
+  hover:-translate-y-0.5
+">
+      <CardContent className="flex min-h-[220px] flex-col items-center justify-center gap-3 p-8 text-center">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted">
+          <Icon className="h-5 w-5 text-muted-foreground" />
+        </div>
+        <p className="text-sm text-muted-foreground">{title}</p>
+      </CardContent>
+    </Card>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main page                                                          */
+/* ------------------------------------------------------------------ */
 
 export default function AnalysisPage() {
-  const searchParams = useSearchParams();
-  const presetId = searchParams.get("invoiceId");
-  const autoRun = searchParams.get("run") === "1";
+  const searchParams = useSearchParams()
+  const presetId = searchParams.get("invoiceId")
+  const autoRun = searchParams.get("run") === "1"
 
-  const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
-  const [selectedId, setSelectedId] = useState<string>(presetId ?? "");
-  const [status, setStatus] = useState("");
-  const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [isRunning, setIsRunning] = useState(false);
-  const [autoRunTriggered, setAutoRunTriggered] = useState(false);
+  const [invoices, setInvoices] = useState<InvoiceSummary[]>([])
+  const [selectedId, setSelectedId] = useState<string>(presetId ?? "")
+  const [status, setStatus] = useState("")
+  const [result, setResult] = useState<AnalysisResult | null>(null)
+  const [isRunning, setIsRunning] = useState(false)
+  const [autoRunTriggered, setAutoRunTriggered] = useState(false)
 
-  const canAnalyze = useMemo(() => selectedId.trim().length > 0, [selectedId]);
+  const canAnalyze = useMemo(() => selectedId.trim().length > 0, [selectedId])
 
-  const aiStatusLabel = () => {
-    if (!result) return null;
-
-    if (result.ai.status === "ok") {
-      return <span className="pill success">AI analysis complete</span>;
-    }
-
-    if (result.ai.status === "skipped") {
-      return <span className="pill warning">AI not applicable</span>;
-    }
-
-    return <span className="pill danger">AI analysis failed</span>;
-  };
-
-
+  /* ---- Fetch invoice list ---- */
   useEffect(() => {
     const loadInvoices = async () => {
       try {
         const response = await fetch(`${API_BASE}/invoices/`, {
           credentials: "include",
-        });
-        if (!response.ok) {
-          throw new Error("Unable to load invoices");
-        }
-        const data = (await response.json()) as InvoiceSummary[];
-        setInvoices(data);
-      } catch (_error) {
-        setStatus("Unable to fetch invoices from the API.");
+        })
+        if (!response.ok) throw new Error("Unable to load invoices")
+        const data = (await response.json()) as InvoiceSummary[]
+        setInvoices(data)
+      } catch {
+        setStatus("Unable to fetch invoices from the API.")
       }
-    };
-
-    loadInvoices();
-  }, []);
+    }
+    loadInvoices()
+  }, [])
 
   useEffect(() => {
-    if (!presetId) {
-      return;
-    }
-    setSelectedId(presetId);
-  }, [presetId]);
+    if (presetId) setSelectedId(presetId)
+  }, [presetId])
 
   useEffect(() => {
-    if (!autoRun || autoRunTriggered || !selectedId) {
-      return;
-    }
-    setAutoRunTriggered(true);
-    handleAnalyze();
-  }, [autoRun, autoRunTriggered, selectedId]);
+    if (!autoRun || autoRunTriggered || !selectedId) return
+    setAutoRunTriggered(true)
+    handleAnalyze()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoRun, autoRunTriggered, selectedId])
 
+  /* ---- Run analysis ---- */
   const handleAnalyze = async () => {
     if (!canAnalyze) {
-      setStatus("Select or enter an invoice ID to analyze.");
-      return;
+      setStatus("Select or enter an invoice ID to analyze.")
+      return
     }
-
     try {
-      setIsRunning(true);
-      setStatus("Running analysis...");
-      setResult(null);
+      setIsRunning(true)
+      setStatus("Running analysis...")
+      setResult(null)
 
       const response = await fetch(
         `${API_BASE}/invoices/${selectedId}/analyze`,
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
+        { method: "POST", credentials: "include" }
+      )
 
-      let data: AnalysisResult | null = null;
+      let data: AnalysisResult | null = null
       try {
-        data = (await response.json()) as AnalysisResult;
+        data = (await response.json()) as AnalysisResult
       } catch {
-        data = null;
+        data = null
       }
 
       if (response.status === 401) {
-        setStatus("Session expired. Please log in again.");
-        return;
+        setStatus("Session expired. Please log in again.")
+        return
       }
-
       if (!response.ok) {
-        setStatus(data?.ai?.message ?? "Analysis failed.");
-        setIsRunning(false);
-        return;
+        setStatus(data?.ai?.message ?? "Analysis failed.")
+        setIsRunning(false)
+        return
       }
 
-      setResult(data);
-      setStatus("Analysis complete.");
-      setIsRunning(false);
-    } catch (_error) {
-      setStatus("Unable to reach the API.");
-      setIsRunning(false);
+      setResult(data)
+      setStatus("Analysis complete.")
+      setIsRunning(false)
+    } catch {
+      setStatus("Unable to reach the API.")
+      setIsRunning(false)
     }
-  };
+  }
+
+  /* ---- AI status helper ---- */
+  const aiStatusPill = () => {
+    if (!result) return null
+    if (result.ai.status === "ok")
+      return <StatusPill status="success" label="Complete" />
+    if (result.ai.status === "skipped")
+      return <StatusPill status="warning" label="Not applicable" />
+    return <StatusPill status="danger" label="Failed" />
+  }
 
   return (
-    <main className="page">
-      <section className="panel">
-        <span className="tag">Analysis</span>
-        <h1 className="title">Analyze uploaded invoices.</h1>
-        <p className="subtitle">
+    <div className="relative flex flex-col gap-8">
+      {/* Subtle radial glow */}
+      <div className="pointer-events-none absolute -top-32 left-1/2 h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-primary/[0.04] blur-3xl" />
+
+      {/* Hero */}
+      <section className="relative flex flex-col gap-3">
+        <Badge
+          variant="secondary"
+          className="w-fit text-xs font-medium uppercase tracking-wider text-muted-foreground"
+        >
+          Analysis
+        </Badge>
+        <h1 className="text-3xl font-semibold tracking-tight text-balance text-foreground lg:text-4xl">
+          Analyze uploaded invoices.
+        </h1>
+        <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
           Select an invoice, run crypto verification, and review AI anomaly
           signals in one place.
         </p>
       </section>
 
-      <section className="card">
-        <div className="field">
-          <label htmlFor="invoiceId">Invoice ID</label>
-          <input
-            id="invoiceId"
-            value={selectedId}
-            onChange={(event) => setSelectedId(event.target.value)}
-            placeholder="Enter invoice ID"
+      {/* Control panel */}
+      <Card className="border-0 bg-card/65 shadow-sm backdrop-blur-xl">
+        <CardContent className="flex flex-col gap-5 p-6">
+          <div className="grid gap-5 md:grid-cols-2">
+            {/* Invoice ID input */}
+            <div className="flex flex-col gap-2">
+              <Label
+                htmlFor="invoiceId"
+                className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+              >
+                Invoice ID
+              </Label>
+              <Input
+                id="invoiceId"
+                value={selectedId}
+                onChange={(e) => setSelectedId(e.target.value)}
+                placeholder="Enter invoice ID"
+                className="bg-background/50"
+              />
+            </div>
+
+            {/* Invoice dropdown */}
+            <div className="flex flex-col gap-2">
+              <Label
+                htmlFor="invoiceList"
+                className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+              >
+                Choose from uploads
+              </Label>
+              <Select value={selectedId} onValueChange={setSelectedId}>
+                <SelectTrigger id="invoiceList" className="bg-background/50">
+                  <SelectValue placeholder="Select invoice" />
+                </SelectTrigger>
+                <SelectContent>
+                  {invoices.map((inv) => (
+                    <SelectItem
+                      key={inv.invoice_id}
+                      value={String(inv.invoice_id)}
+                    >
+                      {"#"}{inv.invoice_id} &middot; {inv.status} &middot;{" "}
+                      {inv.created_at?.slice(0, 10)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Actions row */}
+          <div className="flex flex-wrap items-center gap-4">
+            <Button
+              onClick={handleAnalyze}
+              disabled={!canAnalyze || isRunning}
+              className="gap-2"
+            >
+              {isRunning ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4" />
+                  Run analysis
+                </>
+              )}
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              PDF invoices include signature verification and AI scoring.
+            </span>
+          </div>
+
+          {/* Status feedback */}
+          {selectedId && (
+            <p className="text-xs text-muted-foreground">
+              Selected invoice:{" "}
+              <span className="font-mono font-medium text-foreground">
+                {"#"}{selectedId}
+              </span>
+            </p>
+          )}
+          {status && (
+            <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <Info className="h-3.5 w-3.5" />
+              {status}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Results grid */}
+      {result ? (
+        <div
+          className=" grid gap-6 lg:grid-cols-3 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 duration-300">
+
+          {/* --- Cryptographic Verification --- */}
+          <Card className="border-0 bg-card/65 shadow-sm backdrop-blur-xl">
+            <CardContent className="flex flex-col gap-4 p-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Cryptographic verification
+                </h3>
+              </div>
+
+              <div className="divide-y divide-border/40">
+                <MetricRow
+                  label="Signature present"
+                  value={String(result.crypto.signature_present)}
+                />
+                <MetricRow
+                  label="Signature integrity"
+                  value={result.crypto.signature_integrity}
+                />
+                <MetricRow
+                  label="Certificate trust"
+                  value={result.crypto.certificate_trust}
+                />
+              </div>
+
+              {result.crypto.signer_fingerprint && (
+                <div className="flex flex-col gap-1 rounded-lg bg-muted/50 px-3 py-2">
+                  <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                    <Fingerprint className="h-3 w-3" />
+                    Signer fingerprint
+                  </span>
+                  <span className="truncate font-mono text-xs text-foreground">
+                    {result.crypto.signer_fingerprint}
+                  </span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* --- AI Anomaly Analysis --- */}
+          <Card className="border-0 bg-card/65 shadow-sm backdrop-blur-xl">
+            <CardContent className="flex flex-col gap-4 p-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                  <Brain className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-foreground">
+                    AI anomaly analysis
+                  </h3>
+                  {aiStatusPill()}
+                </div>
+              </div>
+
+              {result.ai.status !== "ok" ? (
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  {result.ai.message ??
+                    "AI analysis did not return a usable result."}
+                </p>
+              ) : (
+                <div className="divide-y divide-border/40">
+                  <MetricRow
+                    label="Anomaly score"
+                    value={String(result.ai.anomaly_score)}
+                  />
+                  <MetricRow
+                    label="Risk level"
+                    value={String(result.ai.risk_level)}
+                  />
+                  <MetricRow
+                    label="Review required"
+                    value={String(result.ai.review_required)}
+                  />
+                  <MetricRow
+                    label="Embedding distance"
+                    value={String(result.ai.embedding_distance)}
+                  />
+                  <MetricRow
+                    label="Distance z-score"
+                    value={String(result.ai.distance_z_score)}
+                  />
+                </div>
+              )}
+
+              {result.ai.explanations?.length ? (
+                <ul className="flex flex-col gap-1.5 rounded-lg bg-muted/50 px-3 py-2">
+                  {result.ai.explanations.map((note, idx) => (
+                    <li
+                      key={`${idx}-${note}`}
+                      className="text-xs leading-relaxed text-muted-foreground"
+                    >
+                      &bull; {note}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </CardContent>
+          </Card>
+
+          {/* --- Rule-based checks --- */}
+          <Card className="border-0 bg-card/65 shadow-sm backdrop-blur-xl">
+            <CardContent className="flex flex-col gap-4 p-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                  <ClipboardCheck className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Rule-based checks
+                </h3>
+              </div>
+
+              {result.rules.status !== "ok" && (
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  {result.rules.message ??
+                    `Rules status: ${result.rules.status}`}
+                </p>
+              )}
+
+              <div className="divide-y divide-border/40">
+                <MetricRow
+                  label="Word count"
+                  value={String(result.rules.word_count ?? "N/A")}
+                />
+                <MetricRow
+                  label="Font count"
+                  value={String(result.rules.font_count ?? "N/A")}
+                />
+                <MetricRow
+                  label="Line items"
+                  value={String(result.rules.line_item_count ?? "N/A")}
+                />
+                <MetricRow
+                  label="Line item sum"
+                  value={String(result.rules.line_item_sum ?? "N/A")}
+                />
+                <MetricRow
+                  label="Subtotal"
+                  value={String(result.rules.subtotal ?? "N/A")}
+                />
+                <MetricRow
+                  label="Tax"
+                  value={String(result.rules.tax ?? "N/A")}
+                />
+                <MetricRow
+                  label="Total"
+                  value={String(result.rules.total ?? "N/A")}
+                />
+              </div>
+
+              {result.rules.checks && (
+                <ul className="flex flex-col gap-1.5 rounded-lg bg-muted/50 px-3 py-2">
+                  <li className="text-xs text-muted-foreground">
+                    Subtotal vs items:{" "}
+                    <span className="font-medium text-foreground">
+                      {String(result.rules.checks.subtotal_matches_items)}
+                    </span>
+                  </li>
+                  <li className="text-xs text-muted-foreground">
+                    {"Total vs subtotal+tax: "}
+                    <span className="font-medium text-foreground">
+                      {String(
+                        result.rules.checks.total_matches_subtotal_tax
+                      )}
+                    </span>
+                  </li>
+                  <li className="text-xs text-muted-foreground">
+                    Subtotal delta:{" "}
+                    <span className="font-medium text-foreground">
+                      {result.rules.checks.subtotal_delta ?? "N/A"}
+                    </span>
+                  </li>
+                  <li className="text-xs text-muted-foreground">
+                    Total delta:{" "}
+                    <span className="font-medium text-foreground">
+                      {result.rules.checks.total_delta ?? "N/A"}
+                    </span>
+                  </li>
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        /* Empty state */
+        <div className="grid gap-6 lg:grid-cols-3">
+          <EmptyCard
+            icon={ShieldCheck}
+            title="Cryptographic verification results will appear here."
+          />
+          <EmptyCard
+            icon={Brain}
+            title="AI anomaly analysis results will appear here."
+          />
+          <EmptyCard
+            icon={ClipboardCheck}
+            title="Rule-based check results will appear here."
           />
         </div>
-        <div className="field">
-          <label htmlFor="invoiceList">Choose from uploads</label>
-          <select
-            id="invoiceList"
-            value={selectedId}
-            onChange={(event) => setSelectedId(event.target.value)}
-          >
-            <option value="">Select invoice</option>
-            {invoices.map((invoice) => (
-              <option key={invoice.invoice_id} value={invoice.invoice_id}>
-                #{invoice.invoice_id} • {invoice.status} •{" "}
-                {invoice.created_at?.slice(0, 10)}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="actions">
-          <button
-            className="button"
-            type="button"
-            onClick={handleAnalyze}
-            disabled={isRunning}
-          >
-            {isRunning ? "Analyzing..." : "Run analysis"}
-          </button>
-          <span className="hint">
-            PDF invoices include signature verification and AI scoring.
-          </span>
-        </div>
-        {selectedId && (
-          <p className="hint">
-            Selected invoice: <span className="mono">#{selectedId}</span>
-          </p>
-        )}
-        {status ? <p className="status">{status}</p> : null}
-      </section>
-
-      {result ? (
-        <section className="grid analysis-grid">
-          <article className="card">
-            <h3>Cryptographic verification</h3>
-            <div className="analysis-list">
-              <div>
-                <p className="metric-label">Signature present</p>
-                <p className="metric-value">
-                  {String(result.crypto.signature_present)}
-                </p>
-              </div>
-              <div>
-                <p className="metric-label">Signature integrity</p>
-                <p className="metric-value">{result.crypto.signature_integrity}</p>
-              </div>
-              <div>
-                <p className="metric-label">Certificate trust</p>
-                <p className="metric-value">{result.crypto.certificate_trust}</p>
-              </div>
-            </div>
-            {result.crypto.signer_fingerprint ? (
-              <div className="upload-meta">
-                <p className="metric-label">Signer fingerprint</p>
-                <p className="mono">{result.crypto.signer_fingerprint}</p>
-              </div>
-            ) : null}
-          </article>
-
-          <article className="card">
-            <h3>
-              AI anomaly analysis{" "}
-              {aiStatusLabel()}
-            </h3>
-            {result.ai.status !== "ok" ? (
-              <p className="status">{result.ai.message ?? "AI analysis did not return a usable result."}</p>
-
-            ) : (
-              <div className="analysis-list">
-                <div>
-                  <p className="metric-label">Anomaly score</p>
-                  <p className="metric-value">{result.ai.anomaly_score}</p>
-                </div>
-                <div>
-                  <p className="metric-label">Risk level</p>
-                  <p className="metric-value">{result.ai.risk_level}</p>
-                </div>
-                <div>
-                  <p className="metric-label">Review required</p>
-                  <p className="metric-value">{String(result.ai.review_required)}</p>
-                </div>
-                <div>
-                  <p className="metric-label">Embedding distance</p>
-                  <p className="metric-value">{result.ai.embedding_distance}</p>
-                </div>
-                <div>
-                  <p className="metric-label">Distance z-score</p>
-                  <p className="metric-value">{result.ai.distance_z_score}</p>
-                </div>
-              </div>
-            )}
-            {result.ai.explanations?.length ? (
-              <ul className="analysis-notes">
-                {result.ai.explanations.map((note, idx) => (
-                  <li key={`${idx}-${note}`}>{note}</li>
-                ))}
-              </ul>
-            ) : null}
-          </article>
-
-          <article className="card">
-            <h3>Rule-based checks</h3>
-            {result.rules.status !== "ok" ? (
-              <p className="status">
-                {result.rules.message ?? `Rules status: ${result.rules.status}`}
-              </p>
-            ) : null}
-            <div className="analysis-list">
-              <div>
-                <p className="metric-label">Word count</p>
-                <p className="metric-value">{result.rules.word_count ?? "N/A"}</p>
-              </div>
-              <div>
-                <p className="metric-label">Font count</p>
-                <p className="metric-value">{result.rules.font_count ?? "N/A"}</p>
-              </div>
-              <div>
-                <p className="metric-label">Line items</p>
-                <p className="metric-value">
-                  {result.rules.line_item_count ?? "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="metric-label">Line item sum</p>
-                <p className="metric-value">
-                  {result.rules.line_item_sum ?? "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="metric-label">Subtotal</p>
-                <p className="metric-value">{result.rules.subtotal ?? "N/A"}</p>
-              </div>
-              <div>
-                <p className="metric-label">Tax</p>
-                <p className="metric-value">{result.rules.tax ?? "N/A"}</p>
-              </div>
-              <div>
-                <p className="metric-label">Total</p>
-                <p className="metric-value">{result.rules.total ?? "N/A"}</p>
-              </div>
-            </div>
-            {result.rules.checks ? (
-              <ul className="analysis-notes">
-                <li>
-                  Subtotal vs items:{" "}
-                  {String(result.rules.checks.subtotal_matches_items)}
-                </li>
-                <li>
-                  Total vs subtotal+tax:{" "}
-                  {String(result.rules.checks.total_matches_subtotal_tax)}
-                </li>
-                <li>
-                  Subtotal delta: {result.rules.checks.subtotal_delta ?? "N/A"}
-                </li>
-                <li>
-                  Total delta: {result.rules.checks.total_delta ?? "N/A"}
-                </li>
-              </ul>
-            ) : null}
-          </article>
-        </section>
-      ) : (
-        <section className="card">
-          <p className="subtitle">
-            Select an invoice and click <strong>Run analysis</strong> to view
-            cryptographic verification, AI anomaly scores, and rule-based checks.
-          </p>
-        </section>
       )}
 
-      <p className="hint">
-        API endpoint: <span className="mono">{API_BASE}</span>
+      {/* Footer hint */}
+      <p className="text-xs text-muted-foreground">
+        API endpoint:{" "}
+        <span className="font-mono font-medium text-foreground">
+          {API_BASE}
+        </span>
       </p>
-    </main>
-  );
+    </div>
+  )
 }
