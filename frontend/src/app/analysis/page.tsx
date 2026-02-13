@@ -147,6 +147,42 @@ function EmptyCard({
   )
 }
 
+function RiskPill({ level }: { level?: string }) {
+  if (!level) return null
+
+  const normalized = level.toLowerCase()
+
+  if (normalized.includes("low")) {
+    return (
+      <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">
+        Low risk
+      </span>
+    )
+  }
+
+  if (normalized.includes("medium")) {
+    return (
+      <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-500/20 dark:text-amber-400">
+        Medium risk
+      </span>
+    )
+  }
+
+  if (normalized.includes("high")) {
+    return (
+      <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700 dark:bg-red-500/20 dark:text-red-400">
+        High risk
+      </span>
+    )
+  }
+
+  return (
+    <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
+      {level}
+    </span>
+  )
+}
+
 /* ------------------------------------------------------------------ */
 /*  Main page                                                          */
 /* ------------------------------------------------------------------ */
@@ -430,10 +466,12 @@ export default function AnalysisPage() {
                     label="Anomaly score"
                     value={String(result.ai.anomaly_score)}
                   />
-                  <MetricRow
-                    label="Risk level"
-                    value={String(result.ai.risk_level)}
-                  />
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                      Risk level
+                    </span>
+                    <RiskPill level={result.ai.risk_level} />
+                  </div>
                   <MetricRow
                     label="Review required"
                     value={String(result.ai.review_required)}
