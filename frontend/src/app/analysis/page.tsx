@@ -217,8 +217,8 @@ function AnomalyScoreBar({ score }: { score?: number }) {
     percentage >= 70
       ? "bg-red-500"
       : percentage >= 40
-      ? "bg-amber-500"
-      : "bg-emerald-500"
+        ? "bg-amber-500"
+        : "bg-emerald-500"
 
   return (
     <div className="flex flex-col gap-2">
@@ -228,6 +228,74 @@ function AnomalyScoreBar({ score }: { score?: number }) {
         </span>
         <span className="text-sm font-semibold text-foreground">
           {(percentage / 100).toFixed(2)}
+        </span>
+      </div>
+
+      <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className={`h-full rounded-full ${color}`}
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
+  )
+}
+
+function CryptoTrustBar({
+  trust,
+}: {
+  trust?: string
+}) {
+  const [animatedValue, setAnimatedValue] = useState(0)
+
+  if (!trust) return null
+
+  // Map backend trust value → percentage
+  const trustMap: Record<string, number> = {
+    trusted: 95,
+    valid: 85,
+    warning: 60,
+    untrusted: 30,
+    invalid: 15,
+  }
+
+  const target = trustMap[trust.toLowerCase()] ?? 50
+
+  useEffect(() => {
+    let start = 0
+    const duration = 800
+    const startTime = performance.now()
+
+    function animate(time: number) {
+      const elapsed = time - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3)
+
+      setAnimatedValue(start + (target - start) * eased)
+
+      if (progress < 1) requestAnimationFrame(animate)
+    }
+
+    requestAnimationFrame(animate)
+  }, [target])
+
+  const percentage = animatedValue
+
+  let color =
+    percentage >= 80
+      ? "bg-emerald-500"
+      : percentage >= 50
+        ? "bg-amber-500"
+        : "bg-red-500"
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          Certificate trust level
+        </span>
+        <span className="text-sm font-semibold text-foreground">
+          {Math.round(percentage)}%
         </span>
       </div>
 
@@ -477,6 +545,7 @@ export default function AnalysisPage() {
                   label="Signature integrity"
                   value={result.crypto.signature_integrity}
                 />
+                <CryptoTrustBar trust={result.crypto.certificate_trust} />
                 <MetricRow
                   label="Certificate trust"
                   value={result.crypto.certificate_trust}
