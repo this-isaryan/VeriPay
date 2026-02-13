@@ -309,6 +309,28 @@ function CryptoTrustBar({
   )
 }
 
+function SkeletonCard() {
+  return (
+    <Card className="border-0 bg-card/65 shadow-sm backdrop-blur-xl">
+      <CardContent className="flex flex-col gap-4 p-6">
+        {/* Header skeleton */}
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-xl bg-muted animate-pulse" />
+          <div className="h-4 w-40 rounded bg-muted animate-pulse" />
+        </div>
+
+        {/* Content skeleton lines */}
+        <div className="space-y-3">
+          <div className="h-3 w-full rounded bg-muted animate-pulse" />
+          <div className="h-3 w-5/6 rounded bg-muted animate-pulse" />
+          <div className="h-3 w-4/6 rounded bg-muted animate-pulse" />
+          <div className="h-3 w-3/6 rounded bg-muted animate-pulse" />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 /* ------------------------------------------------------------------ */
 /*  Main page                                                          */
 /* ------------------------------------------------------------------ */
@@ -527,7 +549,14 @@ export default function AnalysisPage() {
       </Card>
 
       {/* Results grid */}
-      {result ? (
+      {isRunning ? (
+        // 1️⃣ SHOW SKELETON ONLY WHILE ANALYZING
+        <div className="grid gap-6 lg:grid-cols-3">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      ) : result ? (
         <div
           className=" grid gap-6 lg:grid-cols-3 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 duration-300">
 
