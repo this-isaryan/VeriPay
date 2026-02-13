@@ -37,6 +37,7 @@ export default function UploadPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [progress, setProgress] = useState(0)
 
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -63,66 +64,59 @@ export default function UploadPage() {
     [handleFile]
   )
 
-  const handleUpload = useCallback(async () => {
-    if (!selectedFile) {
-      setError("Please choose a file first.")
-      return
-    }
-
-    setIsUploading(true)
-    setError(null)
+  const handleUpload = useCallback(() => {
+    if (!selectedFile) return
 
     const formData = new FormData()
     formData.append("file", selectedFile)
 
-    try {
-      const response = await fetch(`${API_BASE}/invoices/upload`, {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      })
+    setIsUploading(true)
+    setProgress(0)
 
-      let data: any = null
-      try {
-        data = await response.json()
-      } catch {
-        data = null
+    const xhr = new XMLHttpRequest()
+
+    xhr.open("POST", `${process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"}/invoices/upload`, true)
+    xhr.withCredentials = true
+
+    // 🔥 Track progress
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100)
+        setProgress(percent)
       }
-
-      if (response.status === 401) {
-        router.push("/login")
-        return
-      }
-
-      if (!response.ok) {
-        setError(data?.detail ?? "Upload failed.")
-        return
-      }
-
-      const mappedResult: UploadResult = {
-        invoiceId: String(data.invoice_id),
-        fileType: String(data.file_type ?? selectedFile.type),
-        status: String(data.status ?? "Queued"),
-        fileHash: String(data.file_hash),
-        fileName: selectedFile.name,
-      }
-
-      setUploadResult(mappedResult)
-      setSelectedFile(null)
-
-      if (analyzeImmediately) {
-        setTimeout(() => {
-          router.push(
-            `/analysis?invoiceId=${data.invoice_id}&run=1`
-          )
-        }, 800)
-      }
-    } catch {
-      setError("Unable to reach the API.")
-    } finally {
-      setIsUploading(false)
     }
-  }, [selectedFile, analyzeImmediately, router])
+
+    xhr.onload = () => {
+      setIsUploading(false)
+
+      if (xhr.status === 401) {
+        window.location.href = "/login"
+        return
+      }
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const data = JSON.parse(xhr.responseText)
+
+        setUploadResult({
+          invoiceId: String(data.invoice_id),
+          fileType: String(data.file_type),
+          status: String(data.status),
+          fileHash: String(data.file_hash),
+          fileName: selectedFile.name,
+        })
+      } else {
+        alert("Upload failed.")
+      }
+    }
+
+    xhr.onerror = () => {
+      setIsUploading(false)
+      alert("Network error.")
+    }
+
+    xhr.send(formData)
+  }, [selectedFile])
+
   return (
     <div className="relative flex flex-col gap-8">
 
@@ -228,11 +222,20 @@ export default function UploadPage() {
               className="gap-2"
             >
               {isUploading ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
-                  Uploading...
-                </>
+                <div className="flex w-full flex-col gap-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span>Uploading…</span>
+                    <span>{progress}%</span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full bg-primary transition-all duration-200"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
               ) : (
+
                 <>
                   <UploadCloud className="h-4 w-4" />
                   Upload invoice
