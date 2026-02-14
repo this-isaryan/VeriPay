@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card"
 import { Shield } from "lucide-react"
 import Link from "next/link"
-// import { VeriPayLogo } from "@/components/veripay-logo"
+import Image from "next/image"
 import { LoginForm } from "@/components/login-form"
 
 export default function LoginPage() {
@@ -60,8 +60,23 @@ export default function LoginPage() {
   "
         >
           <CardHeader className="items-center gap-3 pb-2 pt-8">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-              <Shield className="h-5 w-5 text-primary-foreground" />
+            <div className="flex justify-center">
+              <Image
+                src="/veripay-logo-light.png"
+                alt="VeriPay Logo"
+                width={220}
+                height={70}
+                priority
+                className="block dark:hidden"
+              />
+              <Image
+                src="/veripay-logo-dark.png"
+                alt="VeriPay Logo"
+                width={220}
+                height={70}
+                priority
+                className="hidden dark:block"
+              />
             </div>
             <div className="flex flex-col items-center gap-1.5">
               <CardTitle className="text-xl font-semibold tracking-tight text-foreground">
