@@ -5,7 +5,7 @@ Go to Backend > .env
 Update DB_USER= with your machine username
 
 ```powershell
-cd C:\Users\meetsolanki\Void\study_material\c4990\veripay\backend
+cd C:\Users\meetsolanki\Void\study_material\c4990\veripay\VeriPay\backend
 py -m venv ..\venv
 ..\venv\Scripts\activate
 pip install -r ..\requirements.txt
@@ -14,7 +14,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 
 ## Frontend (Next.js)
 ```powershell
-cd C:\Users\meetsolanki\Void\study_material\c4990\veripay\frontend
+cd C:\Users\meetsolanki\Void\study_material\c4990\veripay\VeriPay\frontend
 npm install
 npm run dev -- --hostname 0.0.0.0 --port 3000
 ```

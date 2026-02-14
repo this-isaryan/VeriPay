@@ -5,7 +5,7 @@ Go to Backend > .env
 Update DB_USER= with your machine username
 
 ```bash
-cd /Users/meetsolanki/Void/study_material/c4990/veripay/backend
+cd /Users/meetsolanki/Void/study_material/c4990/veripay/VeriPay/backend
 python3 -m venv ../venv
 source ../venv/bin/activate
 pip install -r ../requirements.txt
@@ -14,7 +14,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 
 ## Frontend (Next.js)
 ```bash
-cd /Users/meetsolanki/Void/study_material/c4990/veripay/frontend
+cd /Users/meetsolanki/Void/study_material/c4990/veripay/VeriPay/frontend
 npm install
 npm run dev -- --hostname 0.0.0.0 --port 3000
 ```
