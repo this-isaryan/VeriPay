@@ -30,7 +30,9 @@ export default function Sidebar() {
     return (
         <aside className="sticky top-6 flex h-[calc(100vh-3rem)] w-[260px] shrink-0 flex-col rounded-2xl bg-card/70 shadow-md backdrop-blur-md">
             {/* Brand */}
-            <div className="flex items-center gap-3 px-5 pt-6 pb-2">
+            <Link
+                href="/"
+                className="flex items-center gap-3 px-5 pt-6 pb-2 cursor-pointer transition-all hover:scale-[1.02] hover:opacity-90">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
                     <Shield className="h-5 w-5 text-primary-foreground" />
                 </div>
@@ -42,7 +44,7 @@ export default function Sidebar() {
                         Verification
                     </p>
                 </div>
-            </div>
+            </Link>
 
             {/* Navigation */}
             <nav className="mt-6 flex flex-1 flex-col gap-1 px-3">
