@@ -17,6 +17,7 @@ const appNavItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/upload", label: "Upload invoices", icon: Upload },
     { href: "/analysis", label: "Analysis", icon: BarChart3 },
+    { href: "/about", label: "About", icon: Shield },
 ]
 
 const authNavItems = [
