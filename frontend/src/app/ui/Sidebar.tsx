@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
 import {
     LayoutDashboard,
     Upload,
@@ -32,19 +33,28 @@ export default function Sidebar() {
             {/* Brand */}
             <Link
                 href="/"
-                className="flex items-center gap-3 px-5 pt-6 pb-2 cursor-pointer transition-all hover:scale-[1.02] hover:opacity-90">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-                    <Shield className="h-5 w-5 text-primary-foreground" />
-                </div>
-                <div>
-                    <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
-                        VeriPay
-                    </p>
-                    <p className="text-sm font-semibold text-foreground">
-                        Verification
-                    </p>
+                className="flex items-center justify-center pt-6"
+            >
+                <div className="flex justify-center">
+                    <Image
+                        src="/veripay-logo-light.png"
+                        alt="VeriPay Logo"
+                        width={220}
+                        height={70}
+                        priority
+                        className="block dark:hidden"
+                    />
+                    <Image
+                        src="/veripay-logo-dark.png"
+                        alt="VeriPay Logo"
+                        width={220}
+                        height={70}
+                        priority
+                        className="hidden dark:block"
+                    />
                 </div>
             </Link>
+
 
             {/* Navigation */}
             <nav className="mt-6 flex flex-1 flex-col gap-1 px-3">
