@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Shield } from "lucide-react"
+import Image from "next/image"
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
@@ -108,8 +108,23 @@ export default function RegisterPage() {
           "
         >
           <CardHeader className="items-center gap-3 pb-2 pt-8">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-              <Shield className="h-5 w-5 text-primary-foreground" />
+            <div className="flex justify-center">
+              <Image
+                src="/veripay-logo-light.png"
+                alt="VeriPay Logo"
+                width={220}
+                height={70}
+                priority
+                className="block dark:hidden"
+              />
+              <Image
+                src="/veripay-logo-dark.png"
+                alt="VeriPay Logo"
+                width={220}
+                height={70}
+                priority
+                className="hidden dark:block"
+              />
             </div>
             <div className="flex flex-col items-center gap-1.5">
               <CardTitle className="text-xl font-semibold tracking-tight text-foreground">

@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Shield } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { LoginForm } from "@/components/login-form"
