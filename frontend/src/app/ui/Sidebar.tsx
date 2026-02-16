@@ -10,7 +10,7 @@ import {
     Upload,
     BarChart3,
     ShieldCheck,
-    Settings,
+    User,
 } from "lucide-react"
 
 const appNavItems = [
@@ -102,11 +102,11 @@ export default function Sidebar() {
             {user && (
                 <div className="border-t border-border/30 px-3 py-4">
                     <Link
-                        href="/settings"
+                        href="/profile"
                         className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                     >
-                        <Settings className="h-4 w-4" />
-                        Settings
+                        <User className="h-4 w-4" />
+                        Profile
                     </Link>
                 </div>
             )}

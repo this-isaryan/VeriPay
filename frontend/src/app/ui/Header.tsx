@@ -13,7 +13,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Bell, LogOut, Search, Settings, User, Moon, Sun } from "lucide-react"
+import { Bell, LogOut, Search, User, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 
 const API_BASE =
@@ -127,8 +127,8 @@ export default function Header() {
                             </div>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem>
-                                <Settings className="mr-2 h-4 w-4" />
-                                Settings
+                                <User className="mr-2 h-4 w-4" />
+                                Profile
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
