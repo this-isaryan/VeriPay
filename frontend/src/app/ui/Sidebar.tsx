@@ -9,7 +9,7 @@ import {
     LayoutDashboard,
     Upload,
     BarChart3,
-    Shield,
+    ShieldCheck,
     Settings,
 } from "lucide-react"
 
@@ -17,7 +17,7 @@ const appNavItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/upload", label: "Upload invoices", icon: Upload },
     { href: "/analysis", label: "Analysis", icon: BarChart3 },
-    { href: "/about", label: "About", icon: Shield },
+    { href: "/about", label: "About", icon: ShieldCheck },
 ]
 
 const authNavItems = [

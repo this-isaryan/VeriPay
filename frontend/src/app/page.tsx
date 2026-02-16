@@ -148,7 +148,17 @@ export default function Home() {
 
 function Metric({ title, value }: { title: string; value: React.ReactNode }) {
   return (
-    <Card className="border-0 bg-card/65 shadow-sm backdrop-blur-xl">
+    <Card className="border-0
+    bg-card/70
+    backdrop-blur-sm
+    shadow-sm
+    transition-all
+    duration-200
+    hover:-translate-y-0.5
+    hover:shadow-md
+    motion-safe:animate-in
+    motion-safe:fade-in
+    motion-safe:slide-in-from-bottom-2">
       <CardContent className="flex flex-col items-center gap-2 p-6">
         <div className="text-2xl font-semibold text-foreground">{value}</div>
         <div className="text-xs uppercase tracking-wider text-muted-foreground">
@@ -169,7 +179,17 @@ function FeatureCard({
   description: string
 }) {
   return (
-    <Card className="border-0 bg-card/65 shadow-sm backdrop-blur-xl">
+    <Card className="border-0
+    bg-card/70
+    backdrop-blur-sm
+    shadow-sm
+    transition-all
+    duration-200
+    hover:-translate-y-0.5
+    hover:shadow-md
+    motion-safe:animate-in
+    motion-safe:fade-in
+    motion-safe:slide-in-from-bottom-2">
       <CardContent className="flex flex-col gap-4 p-6">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
           <Icon className="h-5 w-5 text-primary" />
